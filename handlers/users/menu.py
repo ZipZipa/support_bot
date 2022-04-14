@@ -9,8 +9,8 @@ from keyboards.inline.menu_keybord import menu_cd, categories_keyboard
 from utils.db.db_menu import get_stage1
 
 
-async def get_message(message: types.Message):
-    await message.answer("Сообщение с <u>HTML-разметкой</u>")
+#async def get_message(message: types.Message):
+#    await message.answer("Сообщение с <u>HTML-разметкой</u>")
 
 
 # Хендлер на команду /menu
@@ -36,7 +36,7 @@ async def list_categories(message: Union[CallbackQuery, Message],
     # Если Message - отправляем новое сообщение
     if isinstance(message, Message):
         logging.info(f'Если Message - отправляем новое сообщение')
-        await message.answer("Смотри, что у нас есть", reply_markup=markup)
+        await message.answer("Главное меню", reply_markup=markup)
 
     # Если CallbackQuery - изменяем это сообщение
     elif isinstance(message, CallbackQuery):
