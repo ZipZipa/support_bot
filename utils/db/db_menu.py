@@ -5,6 +5,36 @@ import sqlite3 as sq
 base = sq.connect('sqlite_python.db')
 cur = base.cursor()
 
+class Tree:
+    def __init__(self, name):
+        self.name = name
+        self.child = []
+
+    def addNode(self, child, parentName):
+        if self.name == parentName:
+            self.child.append(child)
+        for i in self.child:
+            i.addNode(child, parentName)
+
+    def output(self,level):
+        buff = ""
+        if level > 1:
+            buff += "┕━"
+        if level == 1:
+            buff += "┣━"
+        for i in range(0,level,1):
+            if level == 1:
+                break
+            buff = "   " + buff
+        buff += " " + self.name + "\n"
+        for i in self.child:
+            buff += i.output(level + 1)
+        if level == 1:
+            return buff
+        return "┃" + buff
+        if level == 0:
+            return buff
+        return  buff
 
 def get_stage1(sql):
     logging.info(f'Recived sql: {sql}')
@@ -40,3 +70,21 @@ def all_menu(i):
 
 #def all_menu2(array, level):
 #    if not array[level]
+
+
+def menu3():
+        q = f'select title,level, next_level from main_pages order by level'
+        cur.execute(q)
+        menu3 = cur.fetchall()
+        root = Tree("Root")
+        for i in menu3:
+            for j in menu3:
+                if i[1] == 0:
+                    root.addNode(Tree(i[0]), "Root")
+                    break
+                if i[1] == j[2]:
+                    root.addNode(Tree(i[0]), j[0])
+
+        print(root.output(0))
+        return (root.output(0))
+
