@@ -2,6 +2,8 @@ import logging
 import sqlite3 as sq
 
 
+
+
 base = sq.connect('sqlite_python.db')
 cur = base.cursor()
 
