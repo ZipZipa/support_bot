@@ -4,9 +4,10 @@ from typing import Union
 from aiogram.dispatcher.filters import Command
 from aiogram.types import CallbackQuery, Message
 from aiogram import types
+from utils.db.db_menu import all_menu, get_stage1
 from loader import dp
 from keyboards.inline.menu_keybord import menu_cd, categories_keyboard
-from utils.db.db_menu import get_stage1
+
 
 
 #async def get_message(message: types.Message):
@@ -60,6 +61,14 @@ async def navigate(call: CallbackQuery, callback_data: dict):
         sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["rez_page_id"] };'
         date = get_stage1(sql)
         await call.message.edit_text(f"{callback_data['state']}:\n {date[0][0]}  \n\n /menu")
+    elif callback_data["rez"] == "2":
+        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["rez"]};'
+        date = get_stage1(sql)
+        sql = "SELECT * FROM main_pages WHERE level = 201;"
+        await call.message.edit_text(f"{callback_data['state']}:\n {date[0][0]}")
+        await list_categories(call, int(callback_data["level"]), sql, callback_data["rez"])
+
     else:
         sql = f'SELECT * FROM main_pages WHERE level = {callback_data["level"]};'
         await list_categories(call, int(callback_data["level"]), sql, callback_data["rez"])
+
