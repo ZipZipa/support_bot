@@ -84,7 +84,4 @@ def menu3():
                     break
                 if i[1] == j[2]:
                     root.addNode(Tree(i[0]), j[0])
-
-        print(root.output(0))
         return (root.output(0))
-

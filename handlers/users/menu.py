@@ -57,7 +57,7 @@ async def navigate(call: CallbackQuery, callback_data: dict):
 
     if callback_data["rez"] == "1":
         # вставить id резулльтата
-        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["level"] };'
+        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["rez_page_id"] };'
         date = get_stage1(sql)
         await call.message.edit_text(f"{callback_data['state']}:\n {date[0][0]}  \n\n /menu")
     else:
