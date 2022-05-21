@@ -5,15 +5,16 @@ base = sq.connect('sqlite_python.db')
 cur = base.cursor()
 
 class Tree:
-    def __init__(self, name):
+    def __init__(self, name, id):
         self.name = name
         self.child = []
+        self.id = id
 
-    def addNode(self, child, parentName):
-        if self.name == parentName:
+    def addNode(self, child, parentName, id):
+        if ((self.name == parentName) and (self.id != id)):
             self.child.append(child)
         for i in self.child:
-            i.addNode(child, parentName)
+            i.addNode(child, parentName, id)
 
     def output(self,level):
         buff = ""
@@ -62,10 +63,12 @@ def all_users():
         logging.info("Ошибка", error)
 
 def all_menu(i):
-    q=f'SELECT title FROM main_pages WHERE level like ("{int(i)}%")'
+    q=f'SELECT title,last FROM main_pages WHERE level like ("{int(i)}%")'
     cur.execute(q)
     all_menu = cur.fetchall()
     return(all_menu)
+
+
 
 #def all_menu2(array, level):
 #    if not array[level]
@@ -75,12 +78,12 @@ def menu3():
         q = f'select title,level, next_level from main_pages order by level'
         cur.execute(q)
         menu3 = cur.fetchall()
-        root = Tree("Root")
+        root = Tree("Root", -1)
         for i in menu3:
             for j in menu3:
                 if i[1] == 0:
-                    root.addNode(Tree(i[0]), "Root")
+                    root.addNode(Tree(i[0], i[1]), "Root", j[1])
                     break
                 if i[1] == j[2]:
-                    root.addNode(Tree(i[0]), j[0])
+                    root.addNode(Tree(i[0], i[1]), j[0], i[1])
         return (root.output(0))

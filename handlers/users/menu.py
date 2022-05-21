@@ -60,13 +60,15 @@ async def navigate(call: CallbackQuery, callback_data: dict):
         # вставить id резулльтата
         sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["rez_page_id"] };'
         date = get_stage1(sql)
-        await call.message.edit_text(f"{callback_data['state']}:\n {date[0][0]}  \n\n /menu")
+        await call.message.edit_text(f"{date[0][0]} ")
+        sql = f'SELECT * FROM main_pages WHERE level = 0;'
+        # await list_categories(call, int(callback_data["level"]), sql, callback_data["level"])
     elif callback_data["rez"] == "2":
-        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["rez"]};'
+        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["rez_page_id"]};'
         date = get_stage1(sql)
-        sql = "SELECT * FROM main_pages WHERE level = 201;"
-        await call.message.edit_text(f"{callback_data['state']}:\n {date[0][0]}")
-        await list_categories(call, int(callback_data["level"]), sql, callback_data["rez"])
+        sql = f'SELECT * FROM main_pages WHERE level = {callback_data["level"]};'
+        await call.message.edit_text(f"{callback_data['state']}:\n{date[0][0]}")
+        await list_categories(call, int(callback_data["level"]), sql, callback_data["level"])
 
     else:
         sql = f'SELECT * FROM main_pages WHERE level = {callback_data["level"]};'
