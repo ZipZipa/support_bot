@@ -1,8 +1,11 @@
 import logging
 import sqlite3 as sq
+import time
+import datetime
 
 base = sq.connect('sqlite_python.db')
 cur = base.cursor()
+
 
 class Tree:
     def __init__(self, name, id):
@@ -16,13 +19,13 @@ class Tree:
         for i in self.child:
             i.addNode(child, parentName, id)
 
-    def output(self,level):
+    def output(self, level):
         buff = ""
         if level > 1:
             buff += "┕━"
         if level == 1:
             buff += "┣━"
-        for i in range(0,level,1):
+        for i in range(0, level, 1):
             if level == 1:
                 break
             buff = "   " + buff
@@ -34,7 +37,8 @@ class Tree:
         return "┃" + buff
         if level == 0:
             return buff
-        return  buff
+        return buff
+
 
 def get_stage1(sql):
     logging.info(f'Recived sql: {sql}')
@@ -42,9 +46,10 @@ def get_stage1(sql):
 
     types = cur.fetchall()
     logging.info(f'Data SQL. Pass the parametr categories {types}')
-    return(types)
+    return (types)
 
-def add_user(usr,usr_full_name):
+
+def add_user(usr, usr_full_name):
     try:
         logging.info(f'Adding {usr}, {usr_full_name} in db')
         q = f'INSERT or IGNORE INTO users (user_id, subsribe, usr_full_name) VALUES ({usr},false,"{usr_full_name}")'
@@ -54,36 +59,52 @@ def add_user(usr,usr_full_name):
     except sq.Error as error:
         logging.info("Ошибка", error)
 
+
 def all_users():
     try:
         cur.execute('SELECT * FROM users')
         all = cur.fetchall()
-        return(all)
+        return (all)
     except sq.Error as error:
         logging.info("Ошибка", error)
 
+
 def all_menu(i):
-    q=f'SELECT title,last FROM main_pages WHERE level like ("{int(i)}%")'
+    q = f'SELECT title,last FROM main_pages WHERE level like ("{int(i)}%")'
     cur.execute(q)
     all_menu = cur.fetchall()
-    return(all_menu)
+    return (all_menu)
 
 
-
-#def all_menu2(array, level):
+# def all_menu2(array, level):
 #    if not array[level]
 
 
 def menu3():
-        q = f'select title,level, next_level from main_pages order by level'
-        cur.execute(q)
-        menu3 = cur.fetchall()
-        root = Tree("Root", -1)
-        for i in menu3:
-            for j in menu3:
-                if i[1] == 0:
-                    root.addNode(Tree(i[0], i[1]), "Root", j[1])
-                    break
-                if i[1] == j[2]:
-                    root.addNode(Tree(i[0], i[1]), j[0], i[1])
-        return (root.output(0))
+    q = f'select title,level, next_level from main_pages order by level'
+    cur.execute(q)
+    menu3 = cur.fetchall()
+    root = Tree("Root", -1)
+    for i in menu3:
+        for j in menu3:
+            if i[1] == 0:
+                root.addNode(Tree(i[0], i[1]), "Root", j[1])
+                break
+            if i[1] == j[2]:
+                root.addNode(Tree(i[0], i[1]), j[0], i[1])
+    return (root.output(0))
+
+#Добавление кнопки в бд передаем параметры /текушего ур./ Текста кнопки/ Пред.Ур
+#ИД след уровня генерится по юникс времени в genLevel
+def addQuestion(currLevel, text, prevLevel):
+    insQ = f'INSERT INTO main_pages (last,title, level, next_level, rez_page_id, visebiliti, previous_level) ' \
+           f'VALUES ("{1}","{text}", "{currLevel}", "{genLevel()}", "{1}", "{1}", "{prevLevel}"); '
+    print(insQ)
+    cur.execute(insQ)
+    base.commit()
+
+def genLevel():
+    presentDate = datetime.datetime.now()
+    unix_timestamp = datetime.datetime.timestamp(presentDate)
+    print(int(unix_timestamp))
+    return int(unix_timestamp)
