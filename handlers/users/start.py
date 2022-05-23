@@ -1,9 +1,11 @@
-from collections import UserString
 from aiogram import types
 from aiogram.dispatcher.filters.builtin import CommandStart
-from utils.db.db_menu import add_user
 
 from loader import dp
+
+from utils.db.db_menu import add_user
+
+from collections import UserString
 
 
 @dp.message_handler(CommandStart())
@@ -16,9 +18,10 @@ async def bot_start(message: types.Message):
 Я бот поддержки ДОПС.
 Я смогу вам подсказать интересующую информацию или показать куда обратиться.
 
-В некоторых случаях, я Вам буду отправлять прямые ссылки на Confluence или Jira.
+В некоторых случаях, я Вам буду отправлять \
+прямые ссылки на Confluence или Jira.
 ✅Что бы их открыть на Вашем мобильном устройстве, Вы можете скачать браузер
- "Web" >> в приложении "Hub" >> в разделе "Персональный офис".
+"Web" >> в приложении "Hub" >> в разделе "Персональный офис".
 
 Для начала работы выберете или введите команду: /menu
 ''')

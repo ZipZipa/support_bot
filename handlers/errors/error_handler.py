@@ -1,7 +1,8 @@
 import logging
-from aiogram.utils.exceptions import (TelegramAPIError,
+
+from aiogram.utils.exceptions import (CantParseEntities,
                                       MessageNotModified,
-                                      CantParseEntities)
+                                      TelegramAPIError)
 
 
 from loader import dp
