@@ -1,5 +1,7 @@
 import logging
 import sqlite3 as sq
+import time
+import datetime
 
 base = sq.connect('sqlite_python.db')
 cur = base.cursor()
@@ -23,7 +25,8 @@ class Tree:
             buff += "┕━"
         if level == 1:
             buff += "┣━"
-        for _ in range(0, level, 1):
+
+        for i in range(0, level, 1):
             if level == 1:
                 break
             buff = "   " + buff
@@ -44,7 +47,7 @@ def get_stage1(sql):
 
     types = cur.fetchall()
     logging.info(f'Data SQL. Pass the parametr categories {types}')
-    return(types)
+    return (types)
 
 
 def add_user(usr, usr_full_name):
@@ -72,7 +75,7 @@ def all_menu(i):
     sql = f'SELECT title,last FROM main_pages WHERE level like ("{int(i)}%")'
     cur.execute(sql)
     all_menu = cur.fetchall()
-    return(all_menu)
+    return (all_menu)
 
 
 # def all_menu2(array, level):
@@ -92,3 +95,21 @@ def menu3():
             if i[1] == j[2]:
                 root.add_node(Tree(i[0], i[1]), j[0], i[1])
     return (root.output(0))
+
+ 
+#Добавление кнопки в бд передаем параметры /текушего ур./ Текста кнопки/ Пред.Ур
+#ИД след уровня генерится по юникс времени в genLevel
+def add_question(currLevel, text, prevLevel):
+    insQ = f'INSERT INTO main_pages (last,title, level, next_level, rez_page_id, visebiliti, previous_level) ' \
+           f'VALUES ("{1}","{text}", "{currLevel}", "{genLevel()}", "{1}", "{1}", "{prevLevel}"); '
+    print(insQ)
+    cur.execute(insQ)
+    base.commit()
+
+    
+def gen_level():
+    presentDate = datetime.datetime.now()
+    unix_timestamp = datetime.datetime.timestamp(presentDate)
+    print(int(unix_timestamp))
+    return int(unix_timestamp)
+
