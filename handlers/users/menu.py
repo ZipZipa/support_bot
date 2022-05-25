@@ -5,6 +5,8 @@ from aiogram import types
 from aiogram.dispatcher.filters import Command
 from aiogram.types import CallbackQuery, Message
 
+from data.config import ADMINS
+
 from keyboards.inline.menu_keybord import categories_keyboard, menu_cd
 
 from loader import dp
@@ -22,7 +24,12 @@ from cgitb import text
 @dp.message_handler(Command("menu"))
 async def show_menu(message: types.Message):
     current_level = 0
-    sql = "SELECT * FROM main_pages WHERE level = 0;"
+    if str(message.from_user.id) in ADMINS:  # проверка на админа
+        sql = ('SELECT * FROM main_pages WHERE level = 0 '
+               + 'and visebiliti in (0, 1);')
+    else:
+        sql = ('SELECT * FROM main_pages WHERE level = 0 '
+               + 'and visebiliti = 1')
     logging.info(f'Function show_menu, current_level = {current_level}')
     await list_categories(message, current_level, sql, '0')
 
@@ -60,29 +67,45 @@ async def navigate(call: CallbackQuery, callback_data: dict):
     :param callback_data: Словарь с данными, которые хранятся в нажатой кнопке
     """
     logging.info('Function navigate. Handle pressing')
-
+    user_id = str(call.from_user.id)
     if callback_data["rez"] == "1":
+        
         # вставить id резулльтата
         sql = ('SELECT text FROM rez_pages WHERE index_r = '
                + f'{callback_data["rez_page_id"]};')
         date = get_stage1(sql)
         await call.message.edit_text(f"{date[0][0]} ")
-        sql = 'SELECT * FROM main_pages WHERE level = 0;'
+        if user_id in ADMINS:
+            sql = 'SELECT * FROM main_pages WHERE level = 0 and visebiliti in (0, 1);'
+        else:
+            sql = 'SELECT * FROM main_pages WHERE level = 0 and visebiliti = 1;'
         # await list_categories(call, int(callback_data["level"]),
         #                       sql, callback_data["level"])
     elif callback_data["rez"] == "2":
         sql = ('SELECT text FROM rez_pages WHERE index_r = '
                + f'{callback_data["rez_page_id"]};')
         date = get_stage1(sql)
-        sql = ('SELECT * FROM main_pages WHERE level = '
-               + f'{callback_data["level"]};')
+        if user_id in ADMINS:
+            sql = ('SELECT * FROM main_pages WHERE level = '
+                   + f'{callback_data["level"]} and '
+                   + 'visebiliti in (0, 1);')
+        else:
+            sql = ('SELECT * FROM main_pages WHERE level = '
+                   + f'{callback_data["level"]} and '
+                   + 'visebiliti = 1;')
         await call.message.edit_text(f'{callback_data["state"]}:'
                                      + f'\n{date[0][0]}')
         await list_categories(call, int(callback_data["level"]),
                               sql, callback_data["level"])
 
     else:
-        sql = ('SELECT * FROM main_pages WHERE level = '
-               + f'{callback_data["level"]};')
+        if user_id in ADMINS:
+            sql = ('SELECT * FROM main_pages WHERE level = '
+                   + f'{callback_data["level"]} and '
+                   + 'visebiliti in (0, 1);')
+        else:
+            sql = ('SELECT * FROM main_pages WHERE level = '
+                   + f'{callback_data["level"]} and '
+                   + 'visebiliti = 1;')
         await list_categories(call, int(callback_data["level"]),
                               sql, callback_data["rez"])
