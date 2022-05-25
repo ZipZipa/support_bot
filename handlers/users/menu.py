@@ -25,9 +25,11 @@ from cgitb import text
 async def show_menu(message: types.Message):
     current_level = 0
     if str(message.from_user.id) in ADMINS:  # проверка на админа
-        sql = 'SELECT * FROM main_pages WHERE level in (0, -1);'
+        sql = ('SELECT * FROM main_pages WHERE level = 0 '
+               + 'and visebiliti in (0, 1);')
     else:
-        sql = 'SELECT * FROM main_pages WHERE level = 0;'
+        sql = ('SELECT * FROM main_pages WHERE level = 0 '
+               + 'and visebiliti = 1')
     logging.info(f'Function show_menu, current_level = {current_level}')
     await list_categories(message, current_level, sql, '0')
 
