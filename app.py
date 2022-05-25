@@ -1,9 +1,15 @@
 from aiogram import executor
+
 from loader import dp
+
 import handlers
+
 from utils.db.db_menu import menu3, addQuestion
+
 from utils.notify_admins import on_startup_notify
 from utils.set_bot_commands import set_default_commands
+
+import handlers
 
 
 async def on_startup(dispatcher):

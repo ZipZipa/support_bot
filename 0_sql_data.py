@@ -28,7 +28,8 @@ def sql_dara_lowder(cursor):
 
     # наполнеие таблицы
     data3 = """
-    INSERT INTO main_pages (title, last, level, next_level, visebiliti ,rez_page_id)
+    INSERT INTO
+        main_pages (title, last, level, next_level, visebiliti, rez_page_id)
     VALUES
     ('EФС', false , 0, 1 , true , 1),
         ('Новый канал', false , 1, 2 , true , 1),
