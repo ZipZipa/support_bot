@@ -101,7 +101,7 @@ def menu3():
 #ИД след уровня генерится по юникс времени в genLevel
 def add_question(currLevel, text, prevLevel):
     insQ = f'INSERT INTO main_pages (last,title, level, next_level, rez_page_id, visebiliti, previous_level) ' \
-           f'VALUES ("{1}","{text}", "{currLevel}", "{genLevel()}", "{1}", "{1}", "{prevLevel}"); '
+           f'VALUES ("{1}","{text}", "{currLevel}", "{gen_level()}", "{1}", "{1}", "{prevLevel}"); '
     print(insQ)
     cur.execute(insQ)
     base.commit()
