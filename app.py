@@ -4,7 +4,7 @@ from loader import dp
 
 import handlers
 
-from utils.db.db_menu import menu3, add_question
+from utils.db.db_menu import menu3
 
 from utils.notify_admins import on_startup_notify
 from utils.set_bot_commands import set_default_commands

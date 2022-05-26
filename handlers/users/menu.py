@@ -7,7 +7,7 @@ from aiogram.types import CallbackQuery, Message
 
 from data.config import ADMINS
 
-from keyboards.inline.menu_keybord import categories_keyboard, menu_cd
+from keyboards.inline.menu_keybord import categories_keyboard, menu_cd, callback_admin
 
 from loader import dp
 
@@ -64,7 +64,7 @@ async def navigate(call: CallbackQuery, callback_data: dict):
     :param callback_data: Словарь с данными, которые хранятся в нажатой кнопке
     """
     logging.info('Function navigate. Handle pressing')
-    user_id = str(call.from_user.id)
+
     if callback_data["rez"] == "1":
         # вставить id резулльтата
         sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["rez_page_id"] };'
@@ -82,3 +82,7 @@ async def navigate(call: CallbackQuery, callback_data: dict):
     else:
         sql = f'SELECT * FROM main_pages WHERE level = {callback_data["level"]};'
         await list_categories(call, int(callback_data["level"]), sql, callback_data["rez"], check_admin)
+
+@dp.callback_query_handler(callback_admin.filter())
+async def qwe(call: CallbackQuery, callback_data: str):
+    print("Сработал хендлер админа")
