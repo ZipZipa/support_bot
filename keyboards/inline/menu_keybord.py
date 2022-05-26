@@ -21,7 +21,7 @@ def make_callback_data(level, state="0", rez="0", index="0",
 
 # Создаем функцию, которая отдает
 # клавиатуру с доступными stage
-async def categories_keyboard(current_level, sql):
+async def categories_keyboard(current_level, sql, check_admin):
     markup = InlineKeyboardMarkup(row_width=2)
     logging.info('Function categories_keyboard')
     categories = get_stage1(sql)
@@ -53,5 +53,12 @@ async def categories_keyboard(current_level, sql):
                 text="Назад",
                 callback_data=make_callback_data(level=category[7])),
         )
+
+    if check_admin:
+        markup.row(
+        InlineKeyboardButton(
+            text="Новая кнопка",
+            callback_data=make_callback_data(level=category[7])),
+    )
     logging.info('Return markup')
     return markup

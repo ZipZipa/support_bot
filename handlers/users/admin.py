@@ -15,8 +15,7 @@ from utils.db.db_menu import all_menu, all_users, menu3
 @dp.message_handler(Command("admin"))
 async def admin(message: types.Message):
     logging.info('Admin start')
-    admin = str(message.from_user.id)
-    if admin in ADMINS:
+    if check_admin:
         logging.info('Users list')
         await message.reply('Нарекаю тебя АДМИНИСТРАТОР: '
                             + f'{message.from_user.full_name}!')
@@ -28,3 +27,8 @@ async def admin(message: types.Message):
         logging.info(f'Кто-то нас раскрыл... {message.from_user.id}')
         await message.reply(f'{message.from_user.full_name}, '
                             + 'Вы не являетесь администратором бота!')
+
+
+async def check_admin(message: types.Message):
+    admin_id = str(message.from_user.id)
+    return admin_id in ADMINS

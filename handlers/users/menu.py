@@ -15,6 +15,8 @@ from utils.db.db_menu import all_menu, get_stage1
 
 from cgitb import text
 
+from handlers.users.admin import check_admin
+
 
 # async def get_message(message: types.Message):
 #    await message.answer("Сообщение с <u>HTML-разметкой</u>")
@@ -24,14 +26,9 @@ from cgitb import text
 @dp.message_handler(Command("menu"))
 async def show_menu(message: types.Message):
     current_level = 0
-    if str(message.from_user.id) in ADMINS:  # проверка на админа
-        sql = ('SELECT * FROM main_pages WHERE level = 0 '
-               + 'and visebiliti in (0, 1);')
-    else:
-        sql = ('SELECT * FROM main_pages WHERE level = 0 '
-               + 'and visebiliti = 1')
+    sql = "SELECT * FROM main_pages WHERE level = 0;"
     logging.info(f'Function show_menu, current_level = {current_level}')
-    await list_categories(message, current_level, sql, '0')
+    await list_categories(message, current_level, sql, '0', check_admin)
 
 
 # Та самая функция, которая отдает категории.
@@ -40,11 +37,11 @@ async def show_menu(message: types.Message):
 # category, subcategory, item_id,
 # Поэтому ловим все остальное в **kwargs
 async def list_categories(message: Union[CallbackQuery, Message],
-                          current_level, sql, rez, **kwargs):
+                          current_level, sql, rez, check_admin, **kwargs):
     logging.info(f'Function list_categories. rez=  {rez}')
 
     # Клавиатуру формируем с помощью следующей функции
-    markup = await categories_keyboard(current_level, sql)
+    markup = await categories_keyboard(current_level, sql, check_admin)
     logging.info('Keyboard recived')
 
     # Если Message - отправляем новое сообщение
@@ -80,8 +77,8 @@ async def navigate(call: CallbackQuery, callback_data: dict):
         date = get_stage1(sql)
         sql = f'SELECT * FROM main_pages WHERE level = {callback_data["level"]};'
         await call.message.edit_text(f"{callback_data['state']}:\n{date[0][0]}")
-        await list_categories(call, int(callback_data["level"]), sql, callback_data["level"])
+        await list_categories(call, int(callback_data["level"]), sql, callback_data["level"], check_admin)
 
     else:
         sql = f'SELECT * FROM main_pages WHERE level = {callback_data["level"]};'
-        await list_categories(call, int(callback_data["level"]), sql, callback_data["rez"])
+        await list_categories(call, int(callback_data["level"]), sql, callback_data["rez"], check_admin)
