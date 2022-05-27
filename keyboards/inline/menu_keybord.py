@@ -9,10 +9,9 @@ from utils.db.db_menu import get_stage1
 menu_cd = CallbackData("show_menu", "level", "state", "index",
                        "rez", "pre_level", "rez_page_id")
 
-# callback_admin = CallbackData("is_admin_button", "lol")
 
-# def make_callback_admin(is_admin_button="1"):
-#     return callback_admin.new(is_admin_button=is_admin_button)
+cbd_admin = CallbackData("id", "is_admin")
+
 
 # С помощью этой функции будем формировать коллбек дату для каждого
 # элемента меню,в зависимости от переданных параметров.
@@ -57,13 +56,13 @@ async def categories_keyboard(current_level, sql, check_admin):
                 callback_data=make_callback_data(level=category[7])),
         )
 
-    # if check_admin:
-    #     a = make_callback_admin(is_admin_button="0")
-    #     markup.row(
-    #         InlineKeyboardButton(
-    #             text="Добавить кнопку", 
-    #             callback_data=a),
-    #     )
+    if check_admin:
+        markup.row(
+            InlineKeyboardButton(
+                text="Добавить кнопку", 
+                callback_data=cbd_admin.new(is_admin="admin")),
+        )
+
 
     logging.info('Return markup')
     return markup
