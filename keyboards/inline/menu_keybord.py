@@ -4,7 +4,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.callback_data import CallbackData
 
 from utils.db.db_menu import get_stage1
-
+from handlers.users.admin import check_admin
 # Создаем CallbackData-объекты, которые будут нужны для работы с менюшкой
 menu_cd = CallbackData("show_menu", "level", "state", "index",
                        "rez", "pre_level", "rez_page_id")
@@ -23,7 +23,7 @@ def make_callback_data(level, state="0", rez="0", index="0",
 
 # Создаем функцию, которая отдает
 # клавиатуру с доступными stage
-async def categories_keyboard(current_level, sql, check_admin):
+async def categories_keyboard(current_level, sql, user_id):
     markup = InlineKeyboardMarkup(row_width=2)
     logging.info('Function categories_keyboard')
     categories = get_stage1(sql)
@@ -56,7 +56,7 @@ async def categories_keyboard(current_level, sql, check_admin):
                 callback_data=make_callback_data(level=category[7])),
         )
 
-    if check_admin:
+    if check_admin(user_id):
         markup.row(
             InlineKeyboardButton(
                 text="Добавить кнопку", 
