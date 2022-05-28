@@ -100,9 +100,13 @@ def menu3():
 # Добавление кнопки в бд передаем параметры
 # /текушего ур./ Текста кнопки/ Пред.Ур
 # ИД след уровня генерится по юникс времени в genLevel
-def add_button(curr_level, text, prev_level):
-    sql_button = f'INSERT INTO main_pages (last,title, level, next_level, rez_page_id, visebiliti, previous_level) ' \
-           f'VALUES ("{1}","{text}", "{curr_level}", "{gen_level()}", "{1}", "{1}", "{prev_level}"); '
+def add_button(pre_level, level, btn_type, rez_id, btn_text):
+    sql_button = ('INSERT INTO main_pages '
+                  '(last, title, level, next_level, '
+                  'rez_page_id, visebiliti, previous_level) '
+                  'VALUES '
+                  f'({btn_type}, "{btn_text}", {level}, '
+                  f'{rez_id}, {rez_id}, 1, {pre_level}); ')
     print(sql_button)
     cur.execute(sql_button)
     base.commit()

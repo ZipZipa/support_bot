@@ -5,20 +5,13 @@ from aiogram import types
 from aiogram.dispatcher.filters import Command
 from aiogram.types import CallbackQuery, Message
 
-from data.config import ADMINS
-
-
-from keyboards.inline.menu_keybord import categories_keyboard, menu_cd, cbd_admin
-
+from keyboards.inline.menu_keybord import categories_keyboard, menu_cd
 
 from loader import dp
-from utils.db.db_menu import add_button
 
 from utils.db.db_menu import all_menu, get_stage1
 
 from cgitb import text
-
-from handlers.users import button_builder
 
 
 # async def get_message(message: types.Message):
@@ -89,7 +82,4 @@ async def navigate(call: CallbackQuery, callback_data: dict):
         await list_categories(call, int(callback_data["level"]), sql, callback_data["rez"], user_id)
 
 
-@dp.callback_query_handler(cbd_admin.filter(is_admin=['admin']))
-async def admin_nav(call: CallbackQuery, callback_data: dict):
-    print("Сработал хендлер админа")
-    add_button(100, "test", 0)
+
