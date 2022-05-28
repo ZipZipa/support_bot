@@ -1,7 +1,7 @@
 import logging
 import sqlite3 as sq
-import time
 import datetime
+import time
 
 base = sq.connect('sqlite_python.db')
 cur = base.cursor()
@@ -26,7 +26,7 @@ class Tree:
         if level == 1:
             buff += "┣━"
 
-        for i in range(0, level, 1):
+        for _ in range(0, level, 1):
             if level == 1:
                 break
             buff = "   " + buff
@@ -96,20 +96,24 @@ def menu3():
                 root.add_node(Tree(i[0], i[1]), j[0], i[1])
     return (root.output(0))
 
- 
-#Добавление кнопки в бд передаем параметры /текушего ур./ Текста кнопки/ Пред.Ур
-#ИД след уровня генерится по юникс времени в genLevel
-def add_button(currLevel, text, prevLevel):
-    sql_button = f'INSERT INTO main_pages (last,title, level, next_level, rez_page_id, visebiliti, previous_level) ' \
-           f'VALUES ("{1}","{text}", "{currLevel}", "{gen_level()}", "{1}", "{1}", "{prevLevel}"); '
+
+# Добавление кнопки в бд передаем параметры
+# /текушего ур./ Текста кнопки/ Пред.Ур
+# ИД след уровня генерится по юникс времени в genLevel
+def add_button(pre_level, level, btn_type, rez_id, btn_text):
+    sql_button = ('INSERT INTO main_pages '
+                  '(last, title, level, next_level, '
+                  'rez_page_id, visebiliti, previous_level) '
+                  'VALUES '
+                  f'({btn_type}, "{btn_text}", {level}, '
+                  f'{rez_id}, {rez_id}, 1, {pre_level}); ')
     print(sql_button)
     cur.execute(sql_button)
     base.commit()
 
-    
+
 def gen_level():
-    presentDate = datetime.datetime.now()
-    unix_timestamp = datetime.datetime.timestamp(presentDate)
+    present_date = datetime.datetime.now()
+    unix_timestamp = datetime.datetime.timestamp(present_date)
     print(int(unix_timestamp))
     return int(unix_timestamp)
-

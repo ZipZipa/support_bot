@@ -5,17 +5,13 @@ from aiogram import types
 from aiogram.dispatcher.filters import Command
 from aiogram.types import CallbackQuery, Message
 
-from data.config import ADMINS
-
-from keyboards.inline.menu_keybord import categories_keyboard, menu_cd, callback_admin
+from keyboards.inline.menu_keybord import categories_keyboard, menu_cd
 
 from loader import dp
 
 from utils.db.db_menu import all_menu, get_stage1
 
 from cgitb import text
-
-from handlers.users.admin import check_admin
 
 
 # async def get_message(message: types.Message):
@@ -25,10 +21,11 @@ from handlers.users.admin import check_admin
 # Хендлер на команду /menu
 @dp.message_handler(Command("menu"))
 async def show_menu(message: types.Message):
+    user_id = str(message.from_user.id)
     current_level = 0
     sql = "SELECT * FROM main_pages WHERE level = 0;"
     logging.info(f'Function show_menu, current_level = {current_level}')
-    await list_categories(message, current_level, sql, '0', check_admin)
+    await list_categories(message, current_level, sql, '0', user_id)
 
 
 # Та самая функция, которая отдает категории.
@@ -37,11 +34,11 @@ async def show_menu(message: types.Message):
 # category, subcategory, item_id,
 # Поэтому ловим все остальное в **kwargs
 async def list_categories(message: Union[CallbackQuery, Message],
-                          current_level, sql, rez, check_admin, **kwargs):
+                          current_level, sql, rez, user_id, **kwargs):
     logging.info(f'Function list_categories. rez=  {rez}')
 
     # Клавиатуру формируем с помощью следующей функции
-    markup = await categories_keyboard(current_level, sql, check_admin)
+    markup = await categories_keyboard(current_level, sql, user_id)
     logging.info('Keyboard recived')
 
     # Если Message - отправляем новое сообщение
@@ -63,6 +60,7 @@ async def navigate(call: CallbackQuery, callback_data: dict):
     :param call: Тип объекта CallbackQuery, который прилетает в хендлер
     :param callback_data: Словарь с данными, которые хранятся в нажатой кнопке
     """
+    user_id = str(call.from_user.id)
     logging.info('Function navigate. Handle pressing')
 
     if callback_data["rez"] == "1":
@@ -77,12 +75,11 @@ async def navigate(call: CallbackQuery, callback_data: dict):
         date = get_stage1(sql)
         sql = f'SELECT * FROM main_pages WHERE level = {callback_data["level"]};'
         await call.message.edit_text(f"{callback_data['state']}:\n{date[0][0]}")
-        await list_categories(call, int(callback_data["level"]), sql, callback_data["level"], check_admin)
+        await list_categories(call, int(callback_data["level"]), sql, callback_data["level"], user_id)
 
     else:
         sql = f'SELECT * FROM main_pages WHERE level = {callback_data["level"]};'
-        await list_categories(call, int(callback_data["level"]), sql, callback_data["rez"], check_admin)
+        await list_categories(call, int(callback_data["level"]), sql, callback_data["rez"], user_id)
 
-@dp.callback_query_handler(callback_admin.filter())
-async def qwe(call: CallbackQuery, callback_data: str):
-    print("Сработал хендлер админа")
+
+
