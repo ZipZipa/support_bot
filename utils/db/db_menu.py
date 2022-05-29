@@ -115,5 +115,6 @@ def add_button(pre_level, level, btn_type, rez_id, btn_text):
 def gen_level():
     present_date = datetime.datetime.now()
     unix_timestamp = datetime.datetime.timestamp(present_date)
-    print(int(unix_timestamp))
-    return int(unix_timestamp)
+    #print(int(unix_timestamp))
+    print(int(unix_timestamp)%10000000)
+    return int(unix_timestamp%10000000)
