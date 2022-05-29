@@ -23,9 +23,11 @@ from cgitb import text
 async def show_menu(message: types.Message):
     user_id = str(message.from_user.id)
     current_level = 0
+    test_pre_level = 0
+    test_level = 0
     sql = "SELECT * FROM main_pages WHERE level = 0;"
     logging.info(f'Function show_menu, current_level = {current_level}')
-    await list_categories(message, current_level, sql, '0', user_id)
+    await list_categories(message, current_level, sql, '0', user_id, test_pre_level, test_level)
 
 
 # Та самая функция, которая отдает категории.
@@ -34,11 +36,11 @@ async def show_menu(message: types.Message):
 # category, subcategory, item_id,
 # Поэтому ловим все остальное в **kwargs
 async def list_categories(message: Union[CallbackQuery, Message],
-                          current_level, sql, rez, user_id, **kwargs):
-    logging.info(f'Function list_categories. rez=  {rez}')
+                          current_level, sql, rez, user_id, test_pre_level, test_level, **kwargs):
+    logging.info(f'Function list_categories. rez= {rez} current_level= {current_level} test_pre_level= {test_pre_level}')
 
     # Клавиатуру формируем с помощью следующей функции
-    markup = await categories_keyboard(current_level, sql, user_id)
+    markup = await categories_keyboard(current_level, sql, user_id, test_pre_level, test_level)
     logging.info('Keyboard recived')
 
     # Если Message - отправляем новое сообщение
@@ -79,7 +81,7 @@ async def navigate(call: CallbackQuery, callback_data: dict):
 
     else:
         sql = f'SELECT * FROM main_pages WHERE level = {callback_data["level"]};'
-        await list_categories(call, int(callback_data["level"]), sql, callback_data["rez"], user_id)
+        await list_categories(call, int(callback_data["level"]), sql, callback_data["rez"], user_id, callback_data["test_pre_level"], callback_data["test_level"])
 
 
 

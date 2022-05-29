@@ -11,6 +11,7 @@ from loader import dp
 
 from utils.db.db_menu import add_button, gen_level
 
+import logging
 
 # Создаем класс и присваиваем к переменным функцию состояния
 class FSMBtn(StatesGroup):
@@ -38,6 +39,9 @@ cancel_kb = IKMarkup(row_width=1).add(
 @dp.callback_query_handler(cbd_admin.filter())
 async def button_build_start(callback: types.CallbackQuery,
                              callback_data: dict, state: FSMContext):
+    logging.info('button_build_start')
+    logging.info('Prepared callback_data for button_build. callback_data = '
+                     + f'{callback_data}')
     async with state.proxy() as data:
         data['pre_level'] = callback_data['pre_level']
         data['level'] = callback_data['level']
