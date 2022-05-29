@@ -68,10 +68,11 @@ async def cancel_handler(callback: types.CallbackQuery, state: FSMContext):
 async def button_type_set(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data['btn_type'] = int(callback.data.split('_')[-1])
-        if data['btn_type'] == 0:
-            data['rez_id'] = 1
-        else:
-            data['rez_id'] = gen_level()
+        #if data['btn_type'] == 0:
+        #    data['rez_id'] = 1
+        #else:
+        #    data['rez_id'] = gen_level()
+        data['rez_id'] = gen_level()
     await FSMBtn.next()
     # FIXME: клавиатура для отмены выводится новым принтом
     await callback.message.answer('Введите отображаемый текст',
