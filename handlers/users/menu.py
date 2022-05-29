@@ -76,7 +76,7 @@ async def navigate(call: CallbackQuery, callback_data: dict):
         date = get_stage1(sql)
         sql = f'SELECT * FROM main_pages WHERE level = {callback_data["next_level"]};'
         await call.message.edit_text(f"{callback_data['button_name']}:\n{date[0][0]}")
-        await list_categories(call, int(callback_data["next_level"]), sql, callback_data["next_level"], user_id)
+        await list_categories(call, int(callback_data["next_level"]), sql, callback_data["next_level"], user_id, callback_data["test_pre_level"], callback_data["next_level"])
 
     else:
         sql = f'SELECT * FROM main_pages WHERE level = {callback_data["next_level"]};'
