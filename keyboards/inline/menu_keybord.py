@@ -68,7 +68,7 @@ async def categories_keyboard(current_level, sql, user_id):
                 text="Добавить кнопку",
                 # callback_data='add_admin'),
                 callback_data=make_new_button_data(pre_level=category[7],
-                                                   level=category[4])),
+                                                   level=category[3])),
         )
 
     logging.info('Return markup')

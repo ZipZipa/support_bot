@@ -7,7 +7,7 @@ from aiogram.types import InlineKeyboardMarkup as IKMarkup
 
 from keyboards.inline.menu_keybord import cbd_admin
 
-from loader import dp
+from loader import dp, bot
 
 from utils.db.db_menu import add_button, gen_level
 
@@ -43,6 +43,7 @@ async def button_build_start(callback: types.CallbackQuery,
         data['level'] = callback_data['level']
     await callback.answer()  # отвечаем на нажатие "добавить кнопку" ничем
     await FSMBtn.btn_type.set()
+    await bot.edit_message_reply_markup()
     await callback.message.answer('Выберете тип кнопки',
                                   reply_markup=btn_type_kb)
 
@@ -64,10 +65,11 @@ async def cancel_handler(callback: types.CallbackQuery, state: FSMContext):
 async def button_type_set(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data['btn_type'] = int(callback.data.split('_')[-1])
-        if data['btn_type'] == 0:
-            data['rez_id'] = 1
-        else:
-            data['rez_id'] = gen_level()
+        # if data['btn_type'] == 0:
+        #     data['rez_id'] = 1
+        # else:
+        #     data['rez_id'] = gen_level()
+        data['rez_id'] = gen_level()
     await FSMBtn.next()
     # FIXME: клавиатура для отмены выводится новым принтом
     await callback.message.answer('Введите отображаемый текст',
