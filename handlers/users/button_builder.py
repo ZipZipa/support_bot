@@ -7,7 +7,7 @@ from aiogram.types import InlineKeyboardMarkup as IKMarkup
 
 from keyboards.inline.menu_keybord import cbd_admin
 
-from loader import dp, bot
+from loader import dp
 
 from utils.db.db_menu import add_button, gen_level
 
