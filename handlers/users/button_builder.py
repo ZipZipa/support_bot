@@ -47,7 +47,6 @@ async def button_build_start(callback: types.CallbackQuery,
         data['level'] = callback_data['level']
     await callback.answer()  # отвечаем на нажатие "добавить кнопку" ничем
     await FSMBtn.btn_type.set()
-    await bot.edit_message_reply_markup()
     await callback.message.answer('Выберете тип кнопки',
                                   reply_markup=btn_type_kb)
 
