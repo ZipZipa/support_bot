@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
@@ -5,17 +7,19 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardButton as IKButton
 from aiogram.types import InlineKeyboardMarkup as IKMarkup
 
+from handlers.users.menu import show_menu
+
 from keyboards.inline.menu_keybord import cbd_admin
 
 from loader import dp
 
 from utils.db.db_menu import add_button, gen_level
 
-import logging
 
 # Создаем класс и присваиваем к переменным функцию состояния
 class FSMBtn(StatesGroup):
     btn_type = State()
+    btn_header = State()
     btn_text = State()
 
 
@@ -41,7 +45,7 @@ async def button_build_start(callback: types.CallbackQuery,
                              callback_data: dict, state: FSMContext):
     logging.info('button_build_start')
     logging.info('Prepared callback_data for button_build. callback_data = '
-                     + f'{callback_data}')
+                 f'{callback_data}')
     async with state.proxy() as data:
         data['pre_level'] = callback_data['pre_level']
         data['level'] = callback_data['level']
@@ -61,6 +65,7 @@ async def cancel_handler(callback: types.CallbackQuery, state: FSMContext):
     await state.finish()
     # await callback.message.answer('test', reply_markup='')
     await callback.answer('Button creation cancelled')
+    await show_menu(callback.message)  # вывод меню на экран
 
 
 # Считывает тип кнопки и записывает в словарь
@@ -68,26 +73,47 @@ async def cancel_handler(callback: types.CallbackQuery, state: FSMContext):
 async def button_type_set(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data['btn_type'] = int(callback.data.split('_')[-1])
-        #if data['btn_type'] == 0:
-        #    data['rez_id'] = 1
-        #else:
-        #    data['rez_id'] = gen_level()
         data['rez_id'] = gen_level()
+        if data['btn_type'] == 0:
+            data['btn_text'] = None
+        # else:
+        #    data['rez_id'] = gen_level()
     await FSMBtn.next()
     # FIXME: клавиатура для отмены выводится новым принтом
-    await callback.message.answer('Введите отображаемый текст',
+    await callback.message.answer('Введите заголовок кнопки',
                                   reply_markup=cancel_kb)
 
 
 # Считывает текст кнопки и записывает в словарь
+@dp.message_handler(state=FSMBtn.btn_header)
+async def button_header_set(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['btn_header'] = message.text
+    if data['btn_type'] == 0:
+        async with state.proxy() as data:
+            # await message.reply(data)  # logging info
+            # Вызывает функцию добавления кнопки, передает составленный словарь
+            add_button(data['pre_level'], data['level'], data['btn_type'],
+                       data['rez_id'], data['btn_header'], data['btn_text'])
+            await message.reply('Кнопка успешно добавлена')
+        await state.finish()  # успешное завершение состояния
+        await show_menu(message)  # вывод меню на экран
+    else:
+        await FSMBtn.next()
+        await message.answer('Введите содержимое кнопки',
+                             reply_markup=cancel_kb)
+
+
+# Считывает содержимое кнопки и записывает в словарь
 @dp.message_handler(state=FSMBtn.btn_text)
 async def button_text_set(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['btn_text'] = message.text
     async with state.proxy() as data:
-        await message.reply(data)
+        # await message.reply(data)  # logging info
         # Вызывает функцию добавления кнопки, передает составленный словарь
         add_button(data['pre_level'], data['level'], data['btn_type'],
-                   data['rez_id'], data['btn_text'])
+                   data['rez_id'], data['btn_header'], data['btn_text'])
         await message.reply('Кнопка успешно добавлена')
     await state.finish()  # успешное завершение состояния
+    await show_menu(message)  # вывод меню на экран
