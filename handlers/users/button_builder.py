@@ -1,5 +1,7 @@
 import logging
 
+import string
+
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
@@ -88,7 +90,7 @@ async def button_type_set(callback: types.CallbackQuery, state: FSMContext):
 @dp.message_handler(state=FSMBtn.btn_header)
 async def button_header_set(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['btn_header'] = message.text
+        data['btn_header'] = sym_filter(message.text)
     if data['btn_type'] == 0:
         async with state.proxy() as data:
             # await message.reply(data)  # logging info
@@ -108,7 +110,7 @@ async def button_header_set(message: types.Message, state: FSMContext):
 @dp.message_handler(state=FSMBtn.btn_text)
 async def button_text_set(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['btn_text'] = message.text
+        data['btn_text'] = sym_filter(message.text)
     async with state.proxy() as data:
         # await message.reply(data)  # logging info
         # Вызывает функцию добавления кнопки, передает составленный словарь
@@ -117,3 +119,11 @@ async def button_text_set(message: types.Message, state: FSMContext):
         await message.reply('Кнопка успешно добавлена')
     await state.finish()  # успешное завершение состояния
     await show_menu(message)  # вывод меню на экран
+
+
+def sym_filter(text):
+    forbidden = string.punctuation.replace('\\', '')
+    for sym in forbidden:
+        if sym in text:
+            text = text.replace(sym, f'\\{sym}')
+    return text
