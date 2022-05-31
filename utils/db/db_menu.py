@@ -105,7 +105,7 @@ def add_button(pre_level, level, btn_type, rez_id, btn_header, btn_text):
                   '(last, title, level, next_level, '
                   'rez_page_id, visebiliti, previous_level) '
                   'VALUES '
-                  f'({btn_type}, "{btn_header}", {level}, '
+                  f"({btn_type}, '{btn_header}', {level}, "
                   f'{rez_id}, {rez_id}, 1, {pre_level}); ')
     print(sql_button)
     cur.execute(sql_button)
@@ -114,7 +114,7 @@ def add_button(pre_level, level, btn_type, rez_id, btn_header, btn_text):
         sql_rez_pages = ('INSERT INTO rez_pages '
                          '(text, index_r) '
                          'VALUES '
-                         f'("{btn_text}", {rez_id})')
+                         f"('{btn_text}', {rez_id})")
         cur.execute(sql_rez_pages)
         base.commit()
 

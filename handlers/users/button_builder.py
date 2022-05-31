@@ -1,7 +1,5 @@
 import logging
 
-import string
-
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
@@ -122,8 +120,8 @@ async def button_text_set(message: types.Message, state: FSMContext):
 
 
 def sym_filter(text):
-    forbidden = string.punctuation.replace('\\', '')
+    forbidden = "'"
     for sym in forbidden:
         if sym in text:
-            text = text.replace(sym, f'\\{sym}')
+            text = text.replace(sym, '"')
     return text
