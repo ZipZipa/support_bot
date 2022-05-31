@@ -5,24 +5,15 @@ from aiogram import types
 from aiogram.dispatcher.filters import Command
 from aiogram.types import CallbackQuery, Message
 
-from data.config import ADMINS
-
-
-from keyboards.inline.menu_keybord import categories_keyboard, menu_cd, cbd_admin
-
+from keyboards.inline.menu_keybord import categories_keyboard, menu_cd
 
 from loader import dp
-from utils.db.db_menu import add_button
 
 from utils.db.db_menu import all_menu, get_stage1
 
 from cgitb import text
 
-from handlers.users import button_builder
 
-
-# async def get_message(message: types.Message):
-#    await message.answer("Сообщение с <u>HTML-разметкой</u>")
 
 
 # Хендлер на команду /menu
@@ -30,9 +21,11 @@ from handlers.users import button_builder
 async def show_menu(message: types.Message):
     user_id = str(message.from_user.id)
     current_level = 0
+    test_pre_level = 0
+    next_level = 0
     sql = "SELECT * FROM main_pages WHERE level = 0;"
-    logging.info(f'Function show_menu, current_level = {current_level}')
-    await list_categories(message, current_level, sql, '0', user_id)
+    logging.debug(f'Function show_menu, current_level = {current_level}')
+    await list_categories(message, current_level, sql, '0', user_id, test_pre_level, next_level)
 
 
 # Та самая функция, которая отдает категории.
@@ -41,11 +34,12 @@ async def show_menu(message: types.Message):
 # category, subcategory, item_id,
 # Поэтому ловим все остальное в **kwargs
 async def list_categories(message: Union[CallbackQuery, Message],
-                          current_level, sql, rez, user_id, **kwargs):
-    logging.info(f'Function list_categories. rez=  {rez}')
+                          current_level, sql, button_rezult, user_id, test_pre_level, next_level, **kwargs):
+    
+    logging.info(f'Function list_categories. button_rezult= {button_rezult} current_level= {current_level} test_pre_level= {test_pre_level}')
 
     # Клавиатуру формируем с помощью следующей функции
-    markup = await categories_keyboard(current_level, sql, user_id)
+    markup = await categories_keyboard(current_level, sql, user_id, test_pre_level, next_level)
     logging.info('Keyboard recived')
 
     # Если Message - отправляем новое сообщение
@@ -63,33 +57,29 @@ async def list_categories(message: Union[CallbackQuery, Message],
 # Функция, которая обрабатывает ВСЕ нажатия на кнопки в этой менюшке
 @dp.callback_query_handler(menu_cd.filter())
 async def navigate(call: CallbackQuery, callback_data: dict):
-    """
-    :param call: Тип объекта CallbackQuery, который прилетает в хендлер
-    :param callback_data: Словарь с данными, которые хранятся в нажатой кнопке
-    """
+    
+    #Параметр call: Тип объекта CallbackQuery, который прилетает в хендлер
+    #Параметр callback_data: Словарь с данными, которые хранятся в нажатой кнопке
+
     user_id = str(call.from_user.id)
     logging.info('Function navigate. Handle pressing')
 
-    if callback_data["rez"] == "1":
+    if callback_data["button_rezult"] == "1":
         # вставить id резулльтата
-        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["rez_page_id"] };'
+        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["next_level"] };'
         date = get_stage1(sql)
         await call.message.edit_text(f"{date[0][0]} ")
-        sql = f'SELECT * FROM main_pages WHERE level = 0;'
-        # await list_categories(call, int(callback_data["level"]), sql, callback_data["level"])
-    elif callback_data["rez"] == "2":
-        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["rez_page_id"]};'
+
+    elif callback_data["button_rezult"] == "2":
+        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["next_level"]};'
         date = get_stage1(sql)
-        sql = f'SELECT * FROM main_pages WHERE level = {callback_data["level"]};'
-        await call.message.edit_text(f"{callback_data['state']}:\n{date[0][0]}")
-        await list_categories(call, int(callback_data["level"]), sql, callback_data["level"], user_id)
+        sql = f'SELECT * FROM main_pages WHERE level = {callback_data["next_level"]};'
+        await call.message.edit_text(f"{callback_data['button_name']}:\n{date[0][0]}")
+        await list_categories(call, int(callback_data["next_level"]), sql, callback_data["next_level"], user_id, callback_data["test_pre_level"], callback_data["next_level"])
 
     else:
-        sql = f'SELECT * FROM main_pages WHERE level = {callback_data["level"]};'
-        await list_categories(call, int(callback_data["level"]), sql, callback_data["rez"], user_id)
+        sql = f'SELECT * FROM main_pages WHERE level = {callback_data["next_level"]};'
+        await list_categories(call, int(callback_data["next_level"]), sql, callback_data["button_rezult"], user_id, callback_data["test_pre_level"], callback_data["next_level"])
 
 
-@dp.callback_query_handler(cbd_admin.filter(is_admin=['admin']))
-async def admin_nav(call: CallbackQuery, callback_data: dict):
-    print("Сработал хендлер админа")
-    add_button(100, "test", 0)
+
