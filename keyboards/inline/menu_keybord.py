@@ -1,51 +1,71 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.callback_data import CallbackData
+from handlers.users.admin import check_admin
 from utils.db.db_menu import get_stage1
 import logging
 
-# Создаем CallbackData-объекты, которые будут нужны для работы с менюшкой
-menu_cd = CallbackData("show_menu", "level", "state", "index", "rez", "pre_level", "rez_page_id")
+# Создаем CallbackData-объекты, которые будут нужны для работы с менюшкой и вызова создания кнопки
+menu_cd = CallbackData("menu", "next_level", "button_name", "button_rezult", "test_pre_level")
+
+cbd_admin = CallbackData("add_btn", "pre_level", "level")
 
 
-# С помощью этой функции будем формировать коллбек дату для каждого элемента меню, в зависимости от
-# переданных параметров. Если Подкатегория, или айди товара не выбраны - они по умолчанию равны нулю
-def make_callback_data(level, state="0", rez="0", index="0", pre_level="0", rez_page_id="0"):
-    return menu_cd.new(level=level, state=state, rez=rez ,index=index, pre_level=pre_level, rez_page_id=rez_page_id)
+# С помощью этой функции будем формировать коллбек дату для каждого
+# элемента меню,в зависимости от переданных параметров.
+def make_callback_data(next_level, button_name="0", button_rezult="0", test_pre_level="0"):
+    return menu_cd.new(next_level=next_level, button_name=button_name, button_rezult=button_rezult, test_pre_level=test_pre_level)
+
+def make_new_button_data(pre_level="0", level="0"):
+    return cbd_admin.new(pre_level=pre_level, level=level)
 
 
-# Создаем функцию, которая отдает
-# клавиатуру с доступными stage
-async def categories_keyboard(current_level, sql):
+# Создаем функцию, которая отдает клавиатуру с доступными категориями выбора
+async def categories_keyboard(current_level, sql, user_id, test_pre_level, next_level):
     markup = InlineKeyboardMarkup(row_width=2)
     logging.info('Function categories_keyboard')
     categories = get_stage1(sql)
-    
-    logging.info(f'Categories recived')
+
+    logging.info('Categories recived')
     for category in categories:
-        # Текст на кнопке
+        # 0 - _id
+        # 1 - title
+        # 2 - last
+        # 3 - level
+        # 4 - next_level
+        # 6 - visebiliti
+        # 7 - previous_level
 
         # Сформируем колбек дату, которая будет на кнопке.
         callback_data = make_callback_data(
-            level=category[4],
-            state=category[1],
-            rez=category[2],
-            index=category[-1],
-            pre_level=category[7],
-            rez_page_id=category[5])
+            button_name=category[1],        # Название кнопки
+            button_rezult=category[2],      # Проверка на тип кнопки 0-переход к следующей кнопке 1-финальный вывод 2-вывод текса и переход дальше 
+            test_pre_level=category[3],     # Текущий уровень
+            next_level=category[4],         # Следующий уровень
+            )
+
         logging.info(f'Prepared callback_data for button. callback_data = {callback_data}')
-        
+
         # Вставляем кнопку в клавиатуру
         markup.insert(InlineKeyboardButton(
             text=category[1],
             callback_data=callback_data))
-        
 
-    # Создаем Кнопку "Назад", в которой прописываем колбек дату
+    # Создаем Кнопку "Назад"
     if current_level != 0:
         markup.row(
             InlineKeyboardButton(
                 text="Назад",
-                callback_data=make_callback_data(level=category[7]))
+                callback_data=make_callback_data(test_pre_level)),
         )
+
+    # Создаем кнопку "Добавить кнопку" для админа
+    if check_admin(user_id):
+        markup.row(
+            InlineKeyboardButton(
+                text="Добавить кнопку",
+                callback_data=make_new_button_data(pre_level=test_pre_level,
+                                                   level=next_level)),
+        )
+
     logging.info('Return markup')
     return markup

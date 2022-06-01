@@ -1,8 +1,11 @@
 import logging
 import sqlite3 as sq
+import datetime
+import time
 
 base = sq.connect('sqlite_python.db')
 cur = base.cursor()
+
 
 class Tree:
     def __init__(self, name, id):
@@ -10,19 +13,20 @@ class Tree:
         self.child = []
         self.id = id
 
-    def addNode(self, child, parentName, id):
-        if ((self.name == parentName) and (self.id != id)):
+    def add_node(self, child, parent_name, id):
+        if ((self.name == parent_name) and (self.id != id)):
             self.child.append(child)
         for i in self.child:
-            i.addNode(child, parentName, id)
+            i.add_node(child, parent_name, id)
 
-    def output(self,level):
+    def output(self, level):
         buff = ""
         if level > 1:
             buff += "┕━"
         if level == 1:
             buff += "┣━"
-        for i in range(0,level,1):
+
+        for _ in range(0, level, 1):
             if level == 1:
                 break
             buff = "   " + buff
@@ -34,7 +38,8 @@ class Tree:
         return "┃" + buff
         if level == 0:
             return buff
-        return  buff
+        return buff
+
 
 def get_stage1(sql):
     logging.info(f'Recived sql: {sql}')
@@ -42,48 +47,81 @@ def get_stage1(sql):
 
     types = cur.fetchall()
     logging.info(f'Data SQL. Pass the parametr categories {types}')
-    return(types)
+    return (types)
 
-def add_user(usr,usr_full_name):
+
+def add_user(usr, usr_full_name):
     try:
         logging.info(f'Adding {usr}, {usr_full_name} in db')
-        q = f'INSERT or IGNORE INTO users (user_id, subsribe, usr_full_name) VALUES ({usr},false,"{usr_full_name}")'
-        cur.execute(q)
-        logging.info(f'Done')
+        sql = ('INSERT or IGNORE INTO users (user_id, subsribe, usr_full_name)'
+               + f' VALUES ({usr},false,"{usr_full_name}")')
+        cur.execute(sql)
+        logging.info('Done')
         base.commit()
     except sq.Error as error:
         logging.info("Ошибка", error)
 
+
 def all_users():
     try:
         cur.execute('SELECT * FROM users')
-        all = cur.fetchall()
-        return(all)
+        cur_all = cur.fetchall()
+        return(cur_all)
     except sq.Error as error:
         logging.info("Ошибка", error)
 
+
 def all_menu(i):
-    q=f'SELECT title,last FROM main_pages WHERE level like ("{int(i)}%")'
-    cur.execute(q)
+    sql = f'SELECT title,last FROM main_pages WHERE level like ("{int(i)}%")'
+    cur.execute(sql)
     all_menu = cur.fetchall()
-    return(all_menu)
+    return (all_menu)
 
 
-
-#def all_menu2(array, level):
+# def all_menu2(array, level):
 #    if not array[level]
 
 
 def menu3():
-        q = f'select title,level, next_level from main_pages order by level'
-        cur.execute(q)
-        menu3 = cur.fetchall()
-        root = Tree("Root", -1)
-        for i in menu3:
-            for j in menu3:
-                if i[1] == 0:
-                    root.addNode(Tree(i[0], i[1]), "Root", j[1])
-                    break
-                if i[1] == j[2]:
-                    root.addNode(Tree(i[0], i[1]), j[0], i[1])
-        return (root.output(0))
+    sql = 'select title,level, next_level from main_pages order by level'
+    cur.execute(sql)
+    menu3 = cur.fetchall()
+    root = Tree("Root", -1)
+    for i in menu3:
+        for j in menu3:
+            if i[1] == 0:
+                root.add_node(Tree(i[0], i[1]), "Root", j[1])
+                break
+            if i[1] == j[2]:
+                root.add_node(Tree(i[0], i[1]), j[0], i[1])
+    return (root.output(0))
+
+
+# Добавление кнопки в бд передаем параметры
+# /текушего ур./ Текста кнопки/ Пред.Ур
+# ИД след уровня генерится по юникс времени в genLevel
+def add_button(pre_level, level, btn_type, rez_id, btn_header, btn_text):
+    sql_button = ('INSERT INTO main_pages '
+                  '(last, title, level, next_level, '
+                  'rez_page_id, visebiliti, previous_level) '
+                  'VALUES '
+                  f'({btn_type}, "{btn_header}", {level}, '
+                  f'{rez_id}, {rez_id}, 1, {pre_level}); ')
+    print(sql_button)
+    cur.execute(sql_button)
+    base.commit()
+    if btn_text is not None:
+        sql_rez_pages = ('INSERT INTO rez_pages '
+                         '(text, index_r) '
+                         'VALUES '
+                         f'("{btn_text}", {rez_id})')
+        cur.execute(sql_rez_pages)
+        base.commit()
+
+
+def gen_level():
+    present_date = datetime.datetime.now()
+    unix_timestamp = datetime.datetime.timestamp(present_date)
+    # print(int(unix_timestamp))
+    print(int(unix_timestamp) % 10000000)
+    return int(unix_timestamp % 10000000)
