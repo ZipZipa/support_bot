@@ -66,13 +66,12 @@ async def navigate(call: CallbackQuery, callback_data: dict):
 
     if callback_data["button_rezult"] == "1":
         # вставить id резулльтата
-        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["rez_page_id"] };'
+        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["next_level"] };'
         date = get_stage1(sql)
         await call.message.edit_text(f"{date[0][0]} ")
-        sql = f'SELECT * FROM main_pages WHERE level = 0;'
 
     elif callback_data["button_rezult"] == "2":
-        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["rez_page_id"]};'
+        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["next_level"]};'
         date = get_stage1(sql)
         sql = f'SELECT * FROM main_pages WHERE level = {callback_data["next_level"]};'
         await call.message.edit_text(f"{callback_data['button_name']}:\n{date[0][0]}")
