@@ -120,8 +120,11 @@ async def button_text_set(message: types.Message, state: FSMContext):
 
 
 def sym_filter(text):
-    forbidden = "'"
+    forbidden = r"""':"""
     for sym in forbidden:
         if sym in text:
-            text = text.replace(sym, '"')
+            if sym == "'":
+                text = text.replace(sym, '"')
+            elif sym == ":":
+                text = text.replace(sym, ' ')
     return text
