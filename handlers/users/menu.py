@@ -9,11 +9,7 @@ from keyboards.inline.menu_keybord import categories_keyboard, menu_cd
 
 from loader import dp
 
-from utils.db.db_menu import all_menu, get_stage1
-
-from cgitb import text
-
-
+from utils.db.db_menu import get_stage1
 
 
 # Хендлер на команду /menu
@@ -25,7 +21,8 @@ async def show_menu(message: types.Message):
     next_level = 0
     sql = "SELECT * FROM main_pages WHERE level = 0;"
     logging.debug(f'Function show_menu, current_level = {current_level}')
-    await list_categories(message, current_level, sql, '0', user_id, test_pre_level, next_level)
+    await list_categories(message, current_level, sql, '0',
+                          user_id, test_pre_level, next_level)
 
 
 # Та самая функция, которая отдает категории.
@@ -34,12 +31,16 @@ async def show_menu(message: types.Message):
 # category, subcategory, item_id,
 # Поэтому ловим все остальное в **kwargs
 async def list_categories(message: Union[CallbackQuery, Message],
-                          current_level, sql, button_rezult, user_id, test_pre_level, next_level, **kwargs):
-    
-    logging.info(f'Function list_categories. button_rezult= {button_rezult} current_level= {current_level} test_pre_level= {test_pre_level}')
+                          current_level, sql, button_rezult, user_id,
+                          test_pre_level, next_level, **kwargs):
+
+    logging.info(f'Function list_categories. button_rezult= {button_rezult} '
+                 f'current_level= {current_level} '
+                 f'test_pre_level= {test_pre_level}')
 
     # Клавиатуру формируем с помощью следующей функции
-    markup = await categories_keyboard(current_level, sql, user_id, test_pre_level, next_level)
+    markup = await categories_keyboard(current_level, sql, user_id,
+                                       test_pre_level, next_level)
     logging.info('Keyboard recived')
 
     # Если Message - отправляем новое сообщение
@@ -57,29 +58,40 @@ async def list_categories(message: Union[CallbackQuery, Message],
 # Функция, которая обрабатывает ВСЕ нажатия на кнопки в этой менюшке
 @dp.callback_query_handler(menu_cd.filter())
 async def navigate(call: CallbackQuery, callback_data: dict):
-    
-    #Параметр call: Тип объекта CallbackQuery, который прилетает в хендлер
-    #Параметр callback_data: Словарь с данными, которые хранятся в нажатой кнопке
+
+    # Параметр call: Тип объекта CallbackQuery, который прилетает в хендлер
+    # Параметр callback_data: Словарь с данными,
+    # которые хранятся в нажатой кнопке
 
     user_id = str(call.from_user.id)
     logging.info('Function navigate. Handle pressing')
 
     if callback_data["button_rezult"] == "1":
         # вставить id резулльтата
-        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["next_level"] };'
+        # TODO:
+        sql = ('SELECT text FROM rez_pages WHERE index_r = '
+               f'{callback_data["next_level"]};')
         date = get_stage1(sql)
-        await call.message.edit_text(f"{date[0][0]} ")
+        await call.message.edit_text(f"{date[0][0]}")
+        await call.message.answer('Вернуться в /menu')
 
     elif callback_data["button_rezult"] == "2":
-        sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["next_level"]};'
+        sql = ('SELECT text FROM rez_pages WHERE index_r = '
+               f'{callback_data["next_level"]};')
         date = get_stage1(sql)
-        sql = f'SELECT * FROM main_pages WHERE level = {callback_data["next_level"]};'
-        await call.message.edit_text(f"{callback_data['button_name']}:\n{date[0][0]}")
-        await list_categories(call, int(callback_data["next_level"]), sql, callback_data["next_level"], user_id, callback_data["test_pre_level"], callback_data["next_level"])
+        sql = ('SELECT * FROM main_pages WHERE level = '
+               f'{callback_data["next_level"]};')
+        await call.message.edit_text(f"{callback_data['button_name']}"
+                                     f":\n{date[0][0]}")
+        await list_categories(call, int(callback_data["next_level"]), sql,
+                              callback_data["next_level"], user_id,
+                              callback_data["test_pre_level"],
+                              callback_data["next_level"])
 
     else:
-        sql = f'SELECT * FROM main_pages WHERE level = {callback_data["next_level"]};'
-        await list_categories(call, int(callback_data["next_level"]), sql, callback_data["button_rezult"], user_id, callback_data["test_pre_level"], callback_data["next_level"])
-
-
-
+        sql = ('SELECT * FROM main_pages WHERE level = '
+               f'{callback_data["next_level"]};')
+        await list_categories(call, int(callback_data["next_level"]), sql,
+                              callback_data["button_rezult"], user_id,
+                              callback_data["test_pre_level"],
+                              callback_data["next_level"])
