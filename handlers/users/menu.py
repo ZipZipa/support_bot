@@ -5,6 +5,8 @@ from aiogram import types
 from aiogram.dispatcher.filters import Command
 from aiogram.types import CallbackQuery, Message
 
+from handlers.users.to_main import back_to_main_kb
+
 from keyboards.inline.menu_keybord import categories_keyboard, menu_cd
 
 from loader import dp
@@ -72,8 +74,10 @@ async def navigate(call: CallbackQuery, callback_data: dict):
         sql = ('SELECT text FROM rez_pages WHERE index_r = '
                f'{callback_data["next_level"]};')
         date = get_stage1(sql)
-        await call.message.edit_text(f"{date[0][0]}")
-        await call.message.answer('Вернуться в /menu')
+        await call.message.edit_text(f'{date[0][0]}')
+        # await call.message.answer('Вернуться в /menu')
+        await call.message.answer('Выберете действие',
+                                  reply_markup=back_to_main_kb)
 
     elif callback_data["button_rezult"] == "2":
         sql = ('SELECT text FROM rez_pages WHERE index_r = '

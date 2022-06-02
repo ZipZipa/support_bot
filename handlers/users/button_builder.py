@@ -7,7 +7,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardButton as IKButton
 from aiogram.types import InlineKeyboardMarkup as IKMarkup
 
-from handlers.users.menu import show_menu
+import handlers.users.menu as usr_menu
 
 from keyboards.inline.menu_keybord import cbd_admin
 
@@ -65,7 +65,7 @@ async def cancel_handler(callback: types.CallbackQuery, state: FSMContext):
     await state.finish()
     # await callback.message.answer('test', reply_markup='')
     await callback.answer('Button creation cancelled')
-    await show_menu(callback.message)  # вывод меню на экран
+    await usr_menu.show_menu(callback.message)  # вывод меню на экран
 
 
 # Считывает тип кнопки и записывает в словарь
@@ -97,7 +97,7 @@ async def button_header_set(message: types.Message, state: FSMContext):
                        data['rez_id'], data['btn_header'], data['btn_text'])
             await message.reply('Кнопка успешно добавлена')
         await state.finish()  # успешное завершение состояния
-        await show_menu(message)  # вывод меню на экран
+        await usr_menu.show_menu(message)  # вывод меню на экран
     else:
         await FSMBtn.next()
         await message.answer('Введите содержимое кнопки',
@@ -116,4 +116,4 @@ async def button_text_set(message: types.Message, state: FSMContext):
                    data['rez_id'], data['btn_header'], data['btn_text'])
         await message.reply('Кнопка успешно добавлена')
     await state.finish()  # успешное завершение состояния
-    await show_menu(message)  # вывод меню на экран
+    await usr_menu.show_menu(message)  # вывод меню на экран
