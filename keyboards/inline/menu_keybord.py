@@ -13,6 +13,7 @@ cbd_admin = CallbackData("add_btn", "pre_level", "level")
 # С помощью этой функции будем формировать коллбек дату для каждого
 # элемента меню,в зависимости от переданных параметров.
 def make_callback_data(next_level, button_name="0", button_rezult="0", test_pre_level="0"):
+    logging.info('make_callback_data. Формируем callback')
     return menu_cd.new(next_level=next_level, button_name=button_name, button_rezult=button_rezult, test_pre_level=test_pre_level)
 
 def make_new_button_data(pre_level="0", level="0"):
@@ -43,7 +44,7 @@ async def categories_keyboard(current_level, sql, user_id, test_pre_level, next_
             next_level=category[4],         # Следующий уровень
             )
 
-        logging.info(f'Prepared callback_data for button. callback_data = {callback_data}')
+        logging.info(f'Подготовленная callback_data для кнопки. callback_data = {callback_data}')
 
         # Вставляем кнопку в клавиатуру
         markup.insert(InlineKeyboardButton(
@@ -52,11 +53,18 @@ async def categories_keyboard(current_level, sql, user_id, test_pre_level, next_
 
     # Создаем Кнопку "Назад"
     if current_level != 0:
-        markup.row(
-            InlineKeyboardButton(
-                text="Назад",
-                callback_data=make_callback_data(test_pre_level)),
-        )
+        try:
+            markup.row(
+                InlineKeyboardButton(
+                    text="Назад",
+                    callback_data=make_callback_data(category[7])),
+            )
+        except UnboundLocalError:
+            markup.row(
+                InlineKeyboardButton(
+                    text="Назад",
+                    callback_data=make_callback_data(test_pre_level)),
+            )
 
     # Создаем кнопку "Добавить кнопку" для админа
     if check_admin(user_id):
