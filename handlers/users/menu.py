@@ -5,7 +5,7 @@ from aiogram import types
 from aiogram.dispatcher.filters import Command
 from aiogram.types import CallbackQuery, Message
 
-from keyboards.inline.menu_keybord import categories_keyboard, menu_cd
+from keyboards.inline.menu_keybord import categories_keyboard, menu_cd, make_callback_data
 
 from loader import dp
 
@@ -13,7 +13,7 @@ from utils.db.db_menu import all_menu, get_stage1
 
 from cgitb import text
 
-
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 # Хендлер на команду /menu
@@ -53,7 +53,6 @@ async def list_categories(message: Union[CallbackQuery, Message],
         call = message
         await call.message.edit_reply_markup(markup)
 
-
 # Функция, которая обрабатывает ВСЕ нажатия на кнопки в этой менюшке
 @dp.callback_query_handler(menu_cd.filter())
 async def navigate(call: CallbackQuery, callback_data: dict):
@@ -62,15 +61,23 @@ async def navigate(call: CallbackQuery, callback_data: dict):
     #Параметр callback_data: Словарь с данными, которые хранятся в нажатой кнопке
 
     user_id = str(call.from_user.id)
-    logging.info('Function navigate. Handle pressing')
+    logging.info('Function navigate. Обработка нажатия кнопки')
 
     if callback_data["button_rezult"] == "1":
+        logging.info('button_rezult= "1": Вывод финального текста')
         # вставить id резулльтата
         sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["next_level"] };'
         date = get_stage1(sql)
         await call.message.edit_text(f"{date[0][0]} ")
+        #Формирование кнопки назад
+        await call.message.edit_reply_markup(InlineKeyboardMarkup(row_width=2).row(
+                InlineKeyboardButton(
+                    text="Назад",
+                    callback_data=make_callback_data(callback_data["test_pre_level"])),
+            ))
 
     elif callback_data["button_rezult"] == "2":
+        logging.info('button_rezult= "2": Вывод промежуточного текста')
         sql = f'SELECT text FROM rez_pages WHERE index_r = {callback_data["next_level"]};'
         date = get_stage1(sql)
         sql = f'SELECT * FROM main_pages WHERE level = {callback_data["next_level"]};'
@@ -78,6 +85,7 @@ async def navigate(call: CallbackQuery, callback_data: dict):
         await list_categories(call, int(callback_data["next_level"]), sql, callback_data["next_level"], user_id, callback_data["test_pre_level"], callback_data["next_level"])
 
     else:
+        logging.info('button_rezult= "0": Продолжение ветвления')
         sql = f'SELECT * FROM main_pages WHERE level = {callback_data["next_level"]};'
         await list_categories(call, int(callback_data["next_level"]), sql, callback_data["button_rezult"], user_id, callback_data["test_pre_level"], callback_data["next_level"])
 
