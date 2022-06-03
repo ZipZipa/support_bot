@@ -52,11 +52,18 @@ async def categories_keyboard(current_level, sql, user_id, test_pre_level, next_
 
     # Создаем Кнопку "Назад"
     if current_level != 0:
-        markup.row(
-            InlineKeyboardButton(
-                text="Назад",
-                callback_data=make_callback_data(test_pre_level)),
-        )
+        try:
+            markup.row(
+                InlineKeyboardButton(
+                    text="Назад",
+                    callback_data=make_callback_data(category[7])),
+            )
+        except UnboundLocalError:
+            markup.row(
+                InlineKeyboardButton(
+                    text="Назад",
+                    callback_data=make_callback_data(test_pre_level)),
+            )
 
     # Создаем кнопку "Добавить кнопку" для админа
     if check_admin(user_id):
