@@ -1,4 +1,5 @@
 import logging
+import re
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
@@ -120,8 +121,15 @@ async def button_text_set(message: types.Message, state: FSMContext):
     await show_menu(message)  # вывод меню на экран
 
 
-# обработка ввода
+# Обработка пользовательского ввода
 def text_filter(text, header=False):
+    # обработка длины текста
+    if header is True:
+        if len(text) > 17:
+            return None
+    if len(text) >= 4096:
+        return None
+    # обработка запрещенных символов
     forbidden = r"""':"""
     for sym in forbidden:
         if sym in text:
@@ -130,9 +138,9 @@ def text_filter(text, header=False):
             if header is True:
                 if sym == ":":
                     text = text.replace(sym, ' ')
-    if header is True:
-        if len(text) > 17:
-            return None
-    if len(text) >= 4096:
-        return None
+    # обработка ссылок в тексте
+    links = re.findall(r'http\S+', text)
+    if links:
+        for link in links:
+            text = text.replace(link, f'<a href="{link}">*link*</a>')
     return text
