@@ -37,9 +37,7 @@ cancel_kb = IKMarkup(row_width=1).add(
 )
 
 
-# TODO: Точка входа в конструктор через callback
-# Реагирует на текстовую коллбекдату 'add_button'
-# @dp.callback_query_handler(text='add_button')
+# Точка входа в конструктор через callback
 @dp.callback_query_handler(cbd_admin.filter())
 async def button_build_start(callback: types.CallbackQuery,
                              callback_data: dict, state: FSMContext):
@@ -57,13 +55,11 @@ async def button_build_start(callback: types.CallbackQuery,
 
 # Выход из FSM
 @dp.callback_query_handler(Text(equals='cancel', ignore_case=True), state="*")
-# @dp.message_handler(Text(equals='cancel', ignore_case=True), state="*")
 async def cancel_handler(callback: types.CallbackQuery, state: FSMContext):
     current_state = await state.get_state()
     if current_state is None:
         return
     await state.finish()
-    # await callback.message.answer('test', reply_markup='')
     await callback.answer('Button creation cancelled')
     await show_menu(callback.message)  # вывод меню на экран
 
@@ -76,10 +72,7 @@ async def button_type_set(callback: types.CallbackQuery, state: FSMContext):
         data['rez_id'] = gen_level()
         if data['btn_type'] == 0:
             data['btn_text'] = None
-        # else:
-        #    data['rez_id'] = gen_level()
     await FSMBtn.next()
-    # FIXME: клавиатура для отмены выводится новым принтом
     await callback.message.answer('Введите заголовок кнопки',
                                   reply_markup=cancel_kb)
 
@@ -89,9 +82,13 @@ async def button_type_set(callback: types.CallbackQuery, state: FSMContext):
 async def button_header_set(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['btn_header'] = text_filter(message.text, header=True)
+    if data['btn_header'] is None:
+        logging.info('Header is too long')
+        await message.answer('Достигнут лимит в 17 символов',
+                             reply_markup=cancel_kb)
+        return
     if data['btn_type'] == 0:
         async with state.proxy() as data:
-            # await message.reply(data)  # logging info
             # Вызывает функцию добавления кнопки, передает составленный словарь
             add_button(data['pre_level'], data['level'], data['btn_type'],
                        data['rez_id'], data['btn_header'], data['btn_text'])
@@ -109,8 +106,12 @@ async def button_header_set(message: types.Message, state: FSMContext):
 async def button_text_set(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['btn_text'] = text_filter(message.text)
+    if data['btn_text'] is None:
+        logging.info('Text is too long')
+        await message.answer('Достигнут лимит в 4096 символов',
+                             reply_markup=cancel_kb)
+        return
     async with state.proxy() as data:
-        # await message.reply(data)  # logging info
         # Вызывает функцию добавления кнопки, передает составленный словарь
         add_button(data['pre_level'], data['level'], data['btn_type'],
                    data['rez_id'], data['btn_header'], data['btn_text'])
@@ -119,6 +120,7 @@ async def button_text_set(message: types.Message, state: FSMContext):
     await show_menu(message)  # вывод меню на экран
 
 
+# обработка ввода
 def text_filter(text, header=False):
     forbidden = r"""':"""
     for sym in forbidden:
@@ -128,4 +130,9 @@ def text_filter(text, header=False):
             if header is True:
                 if sym == ":":
                     text = text.replace(sym, ' ')
+    if header is True:
+        if len(text) > 17:
+            return None
+    if len(text) >= 4096:
+        return None
     return text
