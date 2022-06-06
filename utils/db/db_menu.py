@@ -125,3 +125,15 @@ def gen_level():
     # print(int(unix_timestamp))
     print(int(unix_timestamp) % 10000000)
     return int(unix_timestamp % 10000000)
+
+# Функция получения пачки tgId по группе подписки
+def get_subscribers(subGroup):
+    try:
+        cur.execute(f'SELECT user_Id FROM users WHERE groups like ("%{subGroup}%")')
+        cur_all = cur.fetchall()
+        if len(cur_all) == 0:
+            logging.info(f'[get_subscribers] Нет подписчиков для группы: "{subGroup}"')
+            return 0
+        return cur_all
+    except sq.Error as error:
+        logging.info('[get_subscribers] Ошибка', error)
