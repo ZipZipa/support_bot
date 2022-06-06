@@ -14,7 +14,7 @@ from keyboards.inline.menu_keybord import cbd_admin
 
 from loader import dp
 
-from utils.db.db_menu import add_button, gen_level
+from utils.db.db_menu import add_button, gen_level, get_stage1
 
 
 # Создаем класс и присваиваем к переменным функцию состояния
@@ -96,7 +96,11 @@ async def button_header_set(message: types.Message, state: FSMContext):
                        data['rez_id'], data['btn_header'], data['btn_text'])
             await message.reply('Кнопка успешно добавлена')
         await state.finish()  # успешное завершение состояния
-        await show_menu(message)  # вывод меню на экран
+        # Вывод меню на экран
+        await show_menu(message,
+                        test_pre_level=data['pre_level'],
+                        current_level=data['level'],
+                        next_level=data['level'])
     else:
         await FSMBtn.next()
         await message.answer('Введите содержимое кнопки',
@@ -120,7 +124,11 @@ async def button_text_set(message: types.Message, state: FSMContext):
                    data['rez_id'], data['btn_header'], data['btn_text'])
         await message.reply('Кнопка успешно добавлена')
     await state.finish()  # успешное завершение состояния
-    await show_menu(message)  # вывод меню на экран
+    # Вывод меню на экран
+    await show_menu(message,
+                    test_pre_level=data['pre_level'],
+                    current_level=data['level'],
+                    next_level=data['level'])
 
 
 # Обработка пользовательского ввода
