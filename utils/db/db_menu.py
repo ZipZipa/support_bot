@@ -133,6 +133,44 @@ def get_subscribers(subGroup):
         cur_all = cur.fetchall()
         if len(cur_all) == 0:
             logging.info(f'[get_subscribers] Нет подписчиков для группы: "{subGroup}"')
+            return ('None',)
+        return cur_all
+    except sq.Error as error:
+        logging.info('[get_subscribers] Ошибка', error)
+
+# Функция подписки юзера на группу
+def subscribeTo(user,group):
+    try:
+        cur.execute(f'SELECT groups FROM users WHERE WHERE user_Id = ("{user}")')
+        cur_all = cur.fetchall()
+        if len(cur_all) == 0:
+            logging.info(f'[get_subscribers] Нет подписок у пользователя: "{user}"')
+            return 'None'
+        print(cur)
+
+        return cur_all
+    except sq.Error as error:
+        logging.info('[get_subscribers] Ошибка', error)
+
+# Функция отписки юзера от группы
+def unsubscribeFrom(user,group):
+    try:
+        cur.execute(f'SELECT user_Id FROM users WHERE groups like ("%{subGroup}%")')
+        cur_all = cur.fetchall()
+        if len(cur_all) == 0:
+            logging.info(f'[get_subscribers] Нет подписчиков для группы: "{subGroup}"')
+            return 0
+        return cur_all
+    except sq.Error as error:
+        logging.info('[get_subscribers] Ошибка', error)
+
+# Функция отписки юзера от всех групп
+def unsubscribeFrom(user):
+    try:
+        cur.execute(f'SELECT user_Id FROM users WHERE user_Id = ("{user}")')
+        cur_all = cur.fetchall()
+        if len(cur_all) == 0:
+            logging.info(f'[get_subscribers] Нет подписчиков для группы: "{subGroup}"')
             return 0
         return cur_all
     except sq.Error as error:
