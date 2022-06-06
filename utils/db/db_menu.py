@@ -66,7 +66,7 @@ def all_users():
     try:
         cur.execute('SELECT * FROM users')
         cur_all = cur.fetchall()
-        return(cur_all)
+        return (cur_all)
     except sq.Error as error:
         logging.info("Ошибка", error)
 
@@ -126,6 +126,7 @@ def gen_level():
     print(int(unix_timestamp) % 10000000)
     return int(unix_timestamp % 10000000)
 
+
 # Функция получения пачки tgId по группе подписки
 def get_subscribers(subGroup):
     try:
@@ -138,40 +139,71 @@ def get_subscribers(subGroup):
     except sq.Error as error:
         logging.info('[get_subscribers] Ошибка', error)
 
+
 # Функция подписки юзера на группу
-def subscribeTo(user,group):
+def subscribeTo(user, group):
     try:
-        cur.execute(f'SELECT groups FROM users WHERE WHERE user_Id = ("{user}")')
+        cur.execute(f'SELECT groups FROM users WHERE user_Id = ("{user}")')
         cur_all = cur.fetchall()
         if len(cur_all) == 0:
-            logging.info(f'[get_subscribers] Нет подписок у пользователя: "{user}"')
-            return 'None'
-        print(cur)
+            logging.info(f'[subscribeTo] Нет подписок у пользователя: "{user}"')
+            return
 
-        return cur_all
+        if cur_all[0][0].find(group) > -1:
+            logging.info(f'[subscribeTo] Пользователь "{user}" уже состоит в группе: "{group}"')
+            return
+
+        new_group = cur_all[0][0] + ',' + group
+        if new_group is not None:
+            cur.execute('UPDATE users '
+                        f'SET groups = ("{new_group}") '
+                        'WHERE '
+                        f'user_Id = ("{user}")')
+            base.commit()
+        logging.info(f'[subscribeTo] Пользователь "{user}" подписался на группу: "{group}"')
     except sq.Error as error:
-        logging.info('[get_subscribers] Ошибка', error)
+        logging.info('[subscribeTo] Ошибка', error)
+
 
 # Функция отписки юзера от группы
-def unsubscribeFrom(user,group):
+def unsubscribeFrom(user, group):
     try:
-        cur.execute(f'SELECT user_Id FROM users WHERE groups like ("%{subGroup}%")')
+        cur.execute(f'SELECT groups FROM users WHERE user_Id = ("{user}")')
         cur_all = cur.fetchall()
         if len(cur_all) == 0:
-            logging.info(f'[get_subscribers] Нет подписчиков для группы: "{subGroup}"')
-            return 0
-        return cur_all
+            logging.info(f'[unsubscribeFrom] У пользователя "{user}" нет подписок')
+            return
+
+        if cur_all[0][0].find(group) > -1:
+            logging.info(f'[unsubscribeFrom] Пользователь "{user}" состоит в группе: "{group}"')
+            new_group = cur_all[0][0].replace(group, '')
+            print(new_group)
+            new_group = new_group.replace(',,', ',')
+            if new_group.endswith(','):
+                new_group = new_group[:-1]
+            if new_group.startswith(','):
+                new_group = new_group[1:]
+            if new_group is not None:
+                cur.execute('UPDATE users '
+                            f'SET groups = ("{new_group}") '
+                            'WHERE '
+                            f'user_Id = ("{user}")')
+                base.commit()
+            logging.info(f'[unsubscribeFrom] Пользователь "{user}" отписался от группы: "{group}"')
+        else:
+            logging.info(f'[unsubscribeFrom] У пользователя "{user}" отсутствует группа: "{group}"')
     except sq.Error as error:
-        logging.info('[get_subscribers] Ошибка', error)
+        logging.info('[unsubscribeFrom] Ошибка', error)
+
 
 # Функция отписки юзера от всех групп
-def unsubscribeFrom(user):
+def unsubscribeFromGroups(user):
     try:
-        cur.execute(f'SELECT user_Id FROM users WHERE user_Id = ("{user}")')
-        cur_all = cur.fetchall()
-        if len(cur_all) == 0:
-            logging.info(f'[get_subscribers] Нет подписчиков для группы: "{subGroup}"')
-            return 0
-        return cur_all
+        cur.execute('UPDATE users '
+                    f'SET groups = (None) '
+                    'WHERE '
+                    f'user_Id = ("{user}")')
+        base.commit()
+        logging.info(f'[unsubscribeFromGroups] Пользователь "{user}" подписался от всех групп')
     except sq.Error as error:
-        logging.info('[get_subscribers] Ошибка', error)
+        logging.info('[unsubscribeFromGroups] Ошибка', error)
