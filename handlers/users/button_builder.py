@@ -84,8 +84,9 @@ async def button_header_set(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['btn_header'] = text_filter(message.text, header=True)
     if data['btn_header'] is None:
-        logging.info('Header is too long')
-        await message.answer('Достигнут лимит в 17 символов',
+        logging.error('Header is too long')
+        await message.answer('Достигнут лимит в 17 символов, '
+                             'повторите ввод',
                              reply_markup=cancel_kb)
         return
     if data['btn_type'] == 0:
@@ -108,8 +109,9 @@ async def button_text_set(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['btn_text'] = text_filter(message.text)
     if data['btn_text'] is None:
-        logging.info('Text is too long')
-        await message.answer('Достигнут лимит в 4096 символов',
+        logging.error('Text is too long')
+        await message.answer('Достигнут лимит в 4096 символов, '
+                             'повторите ввод',
                              reply_markup=cancel_kb)
         return
     async with state.proxy() as data:
