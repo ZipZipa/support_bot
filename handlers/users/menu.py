@@ -17,12 +17,12 @@ from utils.db.db_menu import get_stage1
 
 # Хендлер на команду /menu
 @dp.message_handler(Command("menu"))
-async def show_menu(message: types.Message):
+async def show_menu(message: types.Message,
+                    test_pre_level=0,
+                    current_level=0,
+                    next_level=0):
     user_id = str(message.from_user.id)
-    current_level = 0
-    test_pre_level = 0
-    next_level = 0
-    sql = "SELECT * FROM main_pages WHERE level = 0;"
+    sql = f"SELECT * FROM main_pages WHERE level = {current_level};"
     logging.debug(f'Function show_menu, current_level = {current_level}')
     await list_categories(message, current_level, sql, '0',
                           user_id, test_pre_level, next_level)
