@@ -26,19 +26,16 @@ class Tree:
         if level == 1:
             buff += "┣━"
 
-        for _ in range(0, level, 1):
+        for _ in range(level):
             if level == 1:
                 break
-            buff = "   " + buff
-        buff += " " + self.name + "\n"
+            buff = f"   {buff}"
+        buff += f" {self.name}" + "\n"
         for i in self.child:
             buff += i.output(level + 1)
         if level == 1:
             return buff
-        return "┃" + buff
-        if level == 0:
-            return buff
-        return buff
+        return f"┃{buff}"
 
 
 def get_stage1(sql):
@@ -65,21 +62,9 @@ def add_user(usr, usr_full_name):
 def all_users():
     try:
         cur.execute('SELECT * FROM users')
-        cur_all = cur.fetchall()
-        return(cur_all)
+        return cur.fetchall()
     except sq.Error as error:
         logging.info("Ошибка", error)
-
-
-def all_menu(i):
-    sql = f'SELECT title,last FROM main_pages WHERE level like ("{int(i)}%")'
-    cur.execute(sql)
-    all_menu = cur.fetchall()
-    return (all_menu)
-
-
-# def all_menu2(array, level):
-#    if not array[level]
 
 
 def menu3():
