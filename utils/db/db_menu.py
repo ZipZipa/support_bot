@@ -49,12 +49,12 @@ class Tree:
             return buff
         return f"┃{buff}"
 
-    def getid(self, id):
-        buff = F'{self.findid(id)}'
+    def getids(self):
+        buff = F'{self.id},'
 
-        # for i in findid(48).child:
-        #     buff += i.getid(id)
-        return f"┃{buff}"
+        for i in self.child:
+            buff += i.getids()
+        return f"{buff}"
 
 
 def get_stage1(sql):
@@ -98,7 +98,8 @@ def draw_tree():
                 break
             if i[1] == j[2]:
                 root.add_node(Tree(i[0], i[1], i[3]), j[0], i[1], i[3])
-    return root.findid(-1).output(0)
+    return root.findid(20).getids()[:-1]
+    # return root.findid(20).getids()[:-1] #Рабочая конфигурация получения всех ойдишников цепочки которую надо удалить
 
 
 # Добавление кнопки в бд передаем параметры
