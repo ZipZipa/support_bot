@@ -84,7 +84,7 @@ async def button_header_set(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['btn_header'] = text_filter(message.text, header=True)
     if data['btn_header'] is None:
-        logging.error('Header is too long')
+        logging.error(f'{message.from_user.id} too long header')
         await message.answer('Достигнут лимит в 17 символов, '
                              'повторите ввод',
                              reply_markup=cancel_kb)
@@ -96,6 +96,8 @@ async def button_header_set(message: types.Message, state: FSMContext):
                        data['rez_id'], data['btn_header'], data['btn_text'])
             await message.reply('Кнопка успешно добавлена')
         await state.finish()  # успешное завершение состояния
+        logging.info(f'{message.from_user.id} added button '
+                     f'"{data["btn_header"]}"')
         # Вывод меню на экран
         await show_menu(message,
                         test_pre_level=data['pre_level'],
@@ -113,7 +115,7 @@ async def button_text_set(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['btn_text'] = text_filter(message.text)
     if data['btn_text'] is None:
-        logging.error('Text is too long')
+        logging.error(f'{message.from_user.id} too long text')
         await message.answer('Достигнут лимит в 4096 символов, '
                              'повторите ввод',
                              reply_markup=cancel_kb)
@@ -124,6 +126,8 @@ async def button_text_set(message: types.Message, state: FSMContext):
                    data['rez_id'], data['btn_header'], data['btn_text'])
         await message.reply('Кнопка успешно добавлена')
     await state.finish()  # успешное завершение состояния
+    logging.info(f'{message.from_user.id} added button '
+                 f'"{data["btn_header"]}"')
     # Вывод меню на экран
     await show_menu(message,
                     test_pre_level=data['pre_level'],
