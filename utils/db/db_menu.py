@@ -23,10 +23,13 @@ class Tree:
     def findid(self, id):
         if self.id == id:
             return self
-        for i in self.child:
-            i.findid(id)
-            if i.id == id:
-                return i
+        if self.child != 0:
+            for i in self.child:
+                i.findid(id)
+                if i.id == id:
+                    return i
+        return self
+
 
 
 
