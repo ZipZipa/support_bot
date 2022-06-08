@@ -140,11 +140,16 @@ def text_filter(text, header=False):
     if len(text) >= 4096:
         return None
     # обработка запрещенных символов
-    forbidden = r"""':"""
+    forbidden = r"""':<>"""
     for sym in forbidden:
         if sym in text:
             if sym == "'":
                 text = text.replace(sym, '"')
+            elif sym == ':':
+                pass
+            else:
+                text = text.replace(sym, ' ')
+            # условия для заголовка кнопки:
             if header is True:
                 if sym == ":":
                     text = text.replace(sym, ' ')
