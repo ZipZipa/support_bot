@@ -24,8 +24,7 @@ class Tree:
         if self.id == id:
             return self
         for i in self.child:
-            i.findid(id)
-            return self
+            return i.findid(id)
 
 
 
@@ -96,7 +95,7 @@ def draw_tree():
                 break
             if i[1] == j[2]:
                 root.add_node(Tree(i[0], i[1], i[3]), j[0], i[1], i[3])
-    return root.findid(20).output(0)
+    return root.findid(2).output(0)
 
 
 # Добавление кнопки в бд передаем параметры
