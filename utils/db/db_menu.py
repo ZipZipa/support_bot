@@ -90,7 +90,7 @@ def all_users():
         logging.info("Ошибка", error)
 
 
-def draw_tree():
+def make_tree():
     sql = 'select title,level,next_level,_Id from main_pages order by level'
     cur.execute(sql)
     draw_tree = cur.fetchall()
@@ -102,23 +102,12 @@ def draw_tree():
                 break
             if i[1] == j[2]:
                 root.add_node(Tree(i[0], i[1], i[3]), j[0], i[1], i[3])
-    return root.output(0)
+    return root
     #return root.findid(20).getids()[:-2] #Рабочая конфигурация получения всех ойдишников цепочки которую надо удалить
 
-def draw_tree2(id):
-    sql = 'select title,level,next_level,_Id from main_pages order by level'
-    cur.execute(sql)
-    draw_tree = cur.fetchall()
-    root = Tree("Root", -1, -1)
-    for i in draw_tree:
-        for j in draw_tree:
-            if i[1] == 0:
-                root.add_node(Tree(i[0], i[1], i[3]), "Root", j[1], i[3])
-                break
-            if i[1] == j[2]:
-                root.add_node(Tree(i[0], i[1], i[3]), j[0], i[1], i[3])
-    # return root.findid(28).output(0)
-    delete_button(root.findid(id).getids()[:-2]) #Рабочая конфигурация получения всех ойдишников цепочки которую надо удалить
+
+def draw_tree(Tree):
+    return Tree.output(0) #Рабочая конфигурация получения всех ойдишников цепочки которую надо удалить
 
 
 # Добавление кнопки в бд передаем параметры
@@ -144,7 +133,7 @@ def add_button(pre_level, level, btn_type, rez_id, btn_header, btn_text):
 
 def delete_button(ids):
     try:
-        cur.execute(f'DELETE FROM main_pages WHERE _id IN ({ids})')
+        cur.execute(f'DELETE FROM main_pages WHERE _id IN ({make_tree().findid(ids).getids()[:-2]})')
         base.commit()
     except sq.Error as error:
         logging.info("Ошибка", error)
