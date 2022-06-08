@@ -5,7 +5,7 @@ from loader import dp
 
 import handlers
 
-from utils.db.db_menu import draw_tree, make_tree, delete_button
+from utils.db.db_menu import draw_tree, make_tree, delete_button, show_delete
 
 from utils.notify_admins import on_startup_notify
 from utils.set_bot_commands import set_default_commands
@@ -19,7 +19,9 @@ async def on_startup(dispatcher):
     # await on_startup_notify(dispatcher)
 
     print(draw_tree(make_tree()))
-    delete_button(69)
+    # print("Удалится :")
+    # print(draw_tree(show_delete(2)))
+    # delete_button(2)
     print(draw_tree(make_tree()))
 
 if __name__ == '__main__':

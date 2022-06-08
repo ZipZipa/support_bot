@@ -138,6 +138,10 @@ def delete_button(ids):
     except sq.Error as error:
         logging.info("Ошибка", error)
 
+def show_delete(ids):
+        return make_tree().findid(ids)
+
+
 def gen_level():
     present_date = datetime.datetime.now()
     unix_timestamp = datetime.datetime.timestamp(present_date)
