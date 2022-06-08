@@ -1,39 +1,34 @@
+import datetime
 import logging
 import sqlite3 as sq
-import datetime
-import time
 
 base = sq.connect('sqlite_python.db')
 cur = base.cursor()
 
 
 class Tree:
-    def __init__(self, name, prev, id):
+    def __init__(self, name, prev, db_id):
         self.name = name
         self.child = []
         self.prev = prev
-        self.id = id
+        self.db_id = db_id
 
-    def add_node(self, child, parent_name, prev, id):
+    def add_node(self, child, parent_name, prev, db_id):
         if ((self.name == parent_name) and (self.prev != prev)):
             self.child.append(child)
         for i in self.child:
-            i.add_node(child, parent_name, prev, id)
+            i.add_node(child, parent_name, prev, db_id)
 
-    def findid(self, id):
-        if self.id == id:
+    def find_db_ids(self, db_id):
+        if self.db_id == db_id:
             return self
         if self.child != 0:
             for i in self.child:
-                i = i.findid(id)
-                if i.id == id:
+                i = i.find_db_ids(db_id)
+                if i.db_id == db_id:
                     self = i
                     break
         return self
-
-
-
-
 
     def output(self, level):
         buff = ""
@@ -53,11 +48,11 @@ class Tree:
             return buff
         return f"┃{buff}"
 
-    def getids(self):
-        buff = f'\'{self.id}\', '
+    def get_db_ids(self):
+        buff = f'\'{self.db_id}\', '
 
         for i in self.child:
-            buff += i.getids()
+            buff += i.get_db_ids()
         return f"{buff}"
 
 
@@ -90,8 +85,9 @@ def all_users():
         logging.info("Ошибка", error)
 
 
-def make_tree():
-    sql = 'select title,level,next_level,_Id from main_pages order by level'
+def create_tree():
+    sql = ('SELECT (title, level, next_level, _id) '
+           'FROM main_pages ORDER BY level')
     cur.execute(sql)
     draw_tree = cur.fetchall()
     root = Tree("Root", -1, -1)
@@ -103,11 +99,16 @@ def make_tree():
             if i[1] == j[2]:
                 root.add_node(Tree(i[0], i[1], i[3]), j[0], i[1], i[3])
     return root
-    #return root.findid(20).getids()[:-2] #Рабочая конфигурация получения всех ойдишников цепочки которую надо удалить
+    # Рабочая конфигурация получения всех ойдишников цепочки
+    # которую надо удалить
+
+    # return root.find_db_ids(20).get_db_ids()[:-2]
 
 
-def draw_tree(Tree):
-    return Tree.output(0) #Рабочая конфигурация получения всех ойдишников цепочки которую надо удалить
+def draw_tree(tree):
+    # Рабочая конфигурация получения всех ойдишников цепочки
+    # которую надо удалить
+    return tree.output(0)
 
 
 # Добавление кнопки в бд передаем параметры
@@ -131,15 +132,18 @@ def add_button(pre_level, level, btn_type, rez_id, btn_header, btn_text):
         cur.execute(sql_rez_pages)
         base.commit()
 
-def delete_button(ids):
+
+def delete_button(db_ids):
     try:
-        cur.execute(f'DELETE FROM main_pages WHERE _id IN ({make_tree().findid(ids).getids()[:-2]})')
+        cur.execute('DELETE FROM main_pages WHERE _id IN '
+                    f'({create_tree().find_db_ids(db_ids).get_db_ids()[:-2]})')
         base.commit()
     except sq.Error as error:
         logging.info("Ошибка", error)
 
-def show_delete(ids):
-        return make_tree().findid(ids)
+
+def show_delete(db_ids):
+    return create_tree().find_db_ids(db_ids)
 
 
 def gen_level():
