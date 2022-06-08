@@ -9,7 +9,7 @@ from loader import dp
 
 from collections import UserString
 
-from utils.db.db_menu import all_users, menu3
+from utils.db.db_menu import all_users, draw_tree
 
 
 @dp.message_handler(Command("admin"))

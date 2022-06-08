@@ -8,16 +8,26 @@ cur = base.cursor()
 
 
 class Tree:
-    def __init__(self, name, id):
+    def __init__(self, name, prev, id):
         self.name = name
         self.child = []
+        self.prev = prev
         self.id = id
 
-    def add_node(self, child, parent_name, id):
-        if ((self.name == parent_name) and (self.id != id)):
+    def add_node(self, child, parent_name, prev, id):
+        if ((self.name == parent_name) and (self.prev != prev)):
             self.child.append(child)
         for i in self.child:
-            i.add_node(child, parent_name, id)
+            i.add_node(child, parent_name, prev, id)
+
+    def findid(self, id):
+        if self.id == id:
+            return self
+        for i in self.child:
+            i.findid(id)
+            return self
+
+
 
     def output(self, level):
         buff = ""
@@ -35,6 +45,13 @@ class Tree:
             buff += i.output(level + 1)
         if level == 1:
             return buff
+        return f"┃{buff}"
+
+    def getid(self, id):
+        buff = F'{self.findid(id)}'
+
+        # for i in findid(48).child:
+        #     buff += i.getid(id)
         return f"┃{buff}"
 
 
@@ -67,19 +84,19 @@ def all_users():
         logging.info("Ошибка", error)
 
 
-def menu3():
-    sql = 'select title,level, next_level from main_pages order by level'
+def draw_tree():
+    sql = 'select title,level,next_level,_Id from main_pages order by level'
     cur.execute(sql)
-    menu3 = cur.fetchall()
-    root = Tree("Root", -1)
-    for i in menu3:
-        for j in menu3:
+    draw_tree = cur.fetchall()
+    root = Tree("Root", -1, -1)
+    for i in draw_tree:
+        for j in draw_tree:
             if i[1] == 0:
-                root.add_node(Tree(i[0], i[1]), "Root", j[1])
+                root.add_node(Tree(i[0], i[1], i[3]), "Root", j[1], i[3])
                 break
             if i[1] == j[2]:
-                root.add_node(Tree(i[0], i[1]), j[0], i[1])
-    return (root.output(0))
+                root.add_node(Tree(i[0], i[1], i[3]), j[0], i[1], i[3])
+    return root.findid(20).output(0)
 
 
 # Добавление кнопки в бд передаем параметры
