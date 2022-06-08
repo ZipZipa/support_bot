@@ -1,4 +1,5 @@
 import logging
+import re
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
@@ -13,7 +14,7 @@ from keyboards.inline.menu_keybord import cbd_admin
 
 from loader import dp
 
-from utils.db.db_menu import add_button, gen_level
+from utils.db.db_menu import add_button, gen_level, get_stage1
 
 
 # Создаем класс и присваиваем к переменным функцию состояния
@@ -37,9 +38,7 @@ cancel_kb = IKMarkup(row_width=1).add(
 )
 
 
-# TODO: Точка входа в конструктор через callback
-# Реагирует на текстовую коллбекдату 'add_button'
-# @dp.callback_query_handler(text='add_button')
+# Точка входа в конструктор через callback
 @dp.callback_query_handler(cbd_admin.filter())
 async def button_build_start(callback: types.CallbackQuery,
                              callback_data: dict, state: FSMContext):
@@ -57,13 +56,11 @@ async def button_build_start(callback: types.CallbackQuery,
 
 # Выход из FSM
 @dp.callback_query_handler(Text(equals='cancel', ignore_case=True), state="*")
-# @dp.message_handler(Text(equals='cancel', ignore_case=True), state="*")
 async def cancel_handler(callback: types.CallbackQuery, state: FSMContext):
     current_state = await state.get_state()
     if current_state is None:
         return
     await state.finish()
-    # await callback.message.answer('test', reply_markup='')
     await callback.answer('Button creation cancelled')
     await show_menu(callback.message)  # вывод меню на экран
 
@@ -76,10 +73,7 @@ async def button_type_set(callback: types.CallbackQuery, state: FSMContext):
         data['rez_id'] = gen_level()
         if data['btn_type'] == 0:
             data['btn_text'] = None
-        # else:
-        #    data['rez_id'] = gen_level()
     await FSMBtn.next()
-    # FIXME: клавиатура для отмены выводится новым принтом
     await callback.message.answer('Введите заголовок кнопки',
                                   reply_markup=cancel_kb)
 
@@ -88,16 +82,25 @@ async def button_type_set(callback: types.CallbackQuery, state: FSMContext):
 @dp.message_handler(state=FSMBtn.btn_header)
 async def button_header_set(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['btn_header'] = message.text
+        data['btn_header'] = text_filter(message.text, header=True)
+    if data['btn_header'] is None:
+        logging.error('Header is too long')
+        await message.answer('Достигнут лимит в 17 символов, '
+                             'повторите ввод',
+                             reply_markup=cancel_kb)
+        return
     if data['btn_type'] == 0:
         async with state.proxy() as data:
-            # await message.reply(data)  # logging info
             # Вызывает функцию добавления кнопки, передает составленный словарь
             add_button(data['pre_level'], data['level'], data['btn_type'],
                        data['rez_id'], data['btn_header'], data['btn_text'])
             await message.reply('Кнопка успешно добавлена')
         await state.finish()  # успешное завершение состояния
-        await show_menu(message)  # вывод меню на экран
+        # Вывод меню на экран
+        await show_menu(message,
+                        test_pre_level=data['pre_level'],
+                        current_level=data['level'],
+                        next_level=data['level'])
     else:
         await FSMBtn.next()
         await message.answer('Введите содержимое кнопки',
@@ -108,12 +111,51 @@ async def button_header_set(message: types.Message, state: FSMContext):
 @dp.message_handler(state=FSMBtn.btn_text)
 async def button_text_set(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['btn_text'] = message.text
+        data['btn_text'] = text_filter(message.text)
+    if data['btn_text'] is None:
+        logging.error('Text is too long')
+        await message.answer('Достигнут лимит в 4096 символов, '
+                             'повторите ввод',
+                             reply_markup=cancel_kb)
+        return
     async with state.proxy() as data:
-        # await message.reply(data)  # logging info
         # Вызывает функцию добавления кнопки, передает составленный словарь
         add_button(data['pre_level'], data['level'], data['btn_type'],
                    data['rez_id'], data['btn_header'], data['btn_text'])
         await message.reply('Кнопка успешно добавлена')
     await state.finish()  # успешное завершение состояния
-    await show_menu(message)  # вывод меню на экран
+    # Вывод меню на экран
+    await show_menu(message,
+                    test_pre_level=data['pre_level'],
+                    current_level=data['level'],
+                    next_level=data['level'])
+
+
+# Обработка пользовательского ввода
+def text_filter(text, header=False):
+    # обработка длины текста
+    if header is True:
+        if len(text) > 17:
+            return None
+    if len(text) >= 4096:
+        return None
+    # обработка запрещенных символов
+    forbidden = r"""':<>"""
+    for sym in forbidden:
+        if sym in text:
+            if sym == "'":
+                text = text.replace(sym, '"')
+            elif sym == ':':
+                pass
+            else:
+                text = text.replace(sym, ' ')
+            # условия для заголовка кнопки:
+            if header is True:
+                if sym == ":":
+                    text = text.replace(sym, ' ')
+    # обработка ссылок в тексте
+    links = re.findall(r'http\S+', text)
+    if links:
+        for link in links:
+            text = text.replace(link, f'<a href="{link}">*link*</a>')
+    return text
