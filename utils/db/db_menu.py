@@ -86,7 +86,7 @@ def all_users():
 
 
 def create_tree():
-    sql = ('SELECT (title, level, next_level, _id) '
+    sql = ('SELECT title, level, next_level, _id '
            'FROM main_pages ORDER BY level')
     cur.execute(sql)
     draw_tree = cur.fetchall()
