@@ -22,12 +22,17 @@ class Tree:
 
     def findid(self, id):
         if self.id == id:
+            print("1 if  "+self.name)
             return self
         if self.child != 0:
+            print("2 if  " + self.name)
             for i in self.child:
-                i.findid(id)
+                i = i.findid(id)
                 if i.id == id:
-                    return i
+                    print("3 if  " + i.name)
+                    self = i
+                    break
+        print("govno  " + self.name)
         return self
 
 
@@ -53,7 +58,7 @@ class Tree:
         return f"┃{buff}"
 
     def getids(self):
-        buff = F'{self.id},'
+        buff = f'\'{self.id}\', '
 
         for i in self.child:
             buff += i.getids()
@@ -101,8 +106,8 @@ def draw_tree():
                 break
             if i[1] == j[2]:
                 root.add_node(Tree(i[0], i[1], i[3]), j[0], i[1], i[3])
-    return root.findid(20).getids()[:-1]
-    # return root.findid(20).getids()[:-1] #Рабочая конфигурация получения всех ойдишников цепочки которую надо удалить
+    # return root.findid(28).output(0)
+    return root.findid(20).getids()[:-2] #Рабочая конфигурация получения всех ойдишников цепочки которую надо удалить
 
 
 # Добавление кнопки в бд передаем параметры
@@ -126,6 +131,12 @@ def add_button(pre_level, level, btn_type, rez_id, btn_header, btn_text):
         cur.execute(sql_rez_pages)
         base.commit()
 
+def delete_button(ids):
+    try:
+        cur.execute(f'DELETE FROM main_pages WHERE _id IN {ids}')
+        base.commit()
+    except sq.Error as error:
+        logging.info("Ошибка", error)
 
 def gen_level():
     present_date = datetime.datetime.now()
