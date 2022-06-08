@@ -133,10 +133,10 @@ def add_button(pre_level, level, btn_type, rez_id, btn_header, btn_text):
         base.commit()
 
 
-def delete_button(db_ids):
+def delete_button(btn_id):
     try:
         cur.execute('DELETE FROM main_pages WHERE _id IN '
-                    f'({create_tree().find_db_ids(db_ids).get_db_ids()[:-2]})')
+                    f'({create_tree().find_db_ids(btn_id).get_db_ids()[:-2]})')
         base.commit()
     except sq.Error as error:
         logging.info("Ошибка", error)
