@@ -15,6 +15,8 @@ menu_cd = CallbackData("menu", "next_level", "button_name",
 
 cbd_admin = CallbackData("add_btn", "pre_level", "level")
 
+cbd_delete = CallbackData("delete", "button_id", "button_name")
+
 
 def make_callback_data(next_level, button_name="0", button_rezult="0",
                        test_pre_level="0"):
@@ -32,6 +34,10 @@ def make_new_button_data(pre_level="0", level="0"):
     return cbd_admin.new(pre_level=pre_level, level=level)
 
 
+def delete_button_data(button_id=None, button_name=None):
+    return cbd_delete.new(button_id=button_id, button_name=button_name)
+
+
 async def categories_keyboard(current_level, sql, user_id,
                               test_pre_level, next_level):
     '''
@@ -42,7 +48,11 @@ async def categories_keyboard(current_level, sql, user_id,
     categories = get_stage1(sql)
 
     logging.info('Categories recived')
+    delete_dict = {}
     for category in categories:
+        delete_dict[category[1]] = category[0]
+        logging.info(f'del_dict: {delete_dict}')
+        logging.info(f'del_dict: {str(delete_dict)}')
         # 0 - _id
         # 1 - title
         # 2 - last
@@ -69,7 +79,9 @@ async def categories_keyboard(current_level, sql, user_id,
         markup.insert(InlineKeyboardButton(
             text=category[1],
             callback_data=callback_data))
-
+    logging.info('Final look:')
+    delete_dict = f'delete_dict {str(delete_dict)}'
+    logging.info(delete_dict)
     # Создаем Кнопку "Назад"
     if current_level != 0:
         try:
@@ -90,8 +102,19 @@ async def categories_keyboard(current_level, sql, user_id,
         markup.row(
             InlineKeyboardButton(
                 text="Добавить кнопку",
-                callback_data=make_new_button_data(pre_level=test_pre_level,
-                                                   level=next_level)),
+                callback_data=make_new_button_data(
+                    pre_level=test_pre_level,
+                    level=next_level,
+                ),
+            ),
+            InlineKeyboardButton(
+                text="Удалить кнопку",
+                # callback_data=delete_button_data(
+                #     button_id=category[0],
+                #     button_name=category[1],
+                callback_data=str(delete_dict)
+                # callback_data='test',
+            ),
         )
 
     logging.info('Return markup')
