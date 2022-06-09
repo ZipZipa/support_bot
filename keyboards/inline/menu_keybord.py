@@ -15,6 +15,8 @@ menu_cd = CallbackData("menu", "next_level", "button_name",
 
 cbd_admin = CallbackData("add_btn", "pre_level", "level")
 
+cbd_delete = CallbackData("delete", "current_level")
+
 
 def make_callback_data(next_level, button_name="0", button_rezult="0",
                        test_pre_level="0"):
@@ -30,6 +32,10 @@ def make_callback_data(next_level, button_name="0", button_rezult="0",
 
 def make_new_button_data(pre_level="0", level="0"):
     return cbd_admin.new(pre_level=pre_level, level=level)
+
+
+def delete_button_data(current_level=None):
+    return cbd_delete.new(current_level=current_level)
 
 
 async def categories_keyboard(current_level, sql, user_id,
@@ -69,7 +75,6 @@ async def categories_keyboard(current_level, sql, user_id,
         markup.insert(InlineKeyboardButton(
             text=category[1],
             callback_data=callback_data))
-
     # Создаем Кнопку "Назад"
     if current_level != 0:
         try:
@@ -90,8 +95,18 @@ async def categories_keyboard(current_level, sql, user_id,
         markup.row(
             InlineKeyboardButton(
                 text="Добавить кнопку",
-                callback_data=make_new_button_data(pre_level=test_pre_level,
-                                                   level=next_level)),
+                callback_data=make_new_button_data(
+                    pre_level=test_pre_level,
+                    level=next_level,
+                ),
+            ),
+            # TODO: передавать current_level, вызывать get_stage_id
+            InlineKeyboardButton(
+                text="Удалить кнопку",
+                callback_data=delete_button_data(
+                    current_level=category[3],
+                ),
+            ),
         )
 
     logging.info('Return markup')
