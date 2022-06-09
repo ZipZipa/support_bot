@@ -104,7 +104,7 @@ async def categories_keyboard(current_level, sql, user_id,
             InlineKeyboardButton(
                 text="Удалить кнопку",
                 callback_data=delete_button_data(
-                    current_level=category[3],
+                    current_level=next_level,
                 ),
             ),
         )
