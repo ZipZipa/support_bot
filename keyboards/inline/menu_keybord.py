@@ -15,7 +15,7 @@ menu_cd = CallbackData("menu", "next_level", "button_name",
 
 cbd_admin = CallbackData("add_btn", "pre_level", "level")
 
-cbd_delete = CallbackData("delete", "button_id", "button_name")
+cbd_delete = CallbackData("delete", "current_level")
 
 
 def make_callback_data(next_level, button_name="0", button_rezult="0",
@@ -34,8 +34,8 @@ def make_new_button_data(pre_level="0", level="0"):
     return cbd_admin.new(pre_level=pre_level, level=level)
 
 
-def delete_button_data(button_id=None, button_name=None):
-    return cbd_delete.new(button_id=button_id, button_name=button_name)
+def delete_button_data(current_level=None):
+    return cbd_delete.new(current_level=current_level)
 
 
 async def categories_keyboard(current_level, sql, user_id,
@@ -48,11 +48,7 @@ async def categories_keyboard(current_level, sql, user_id,
     categories = get_stage1(sql)
 
     logging.info('Categories recived')
-    delete_dict = {}
     for category in categories:
-        delete_dict[category[1]] = category[0]
-        logging.info(f'del_dict: {delete_dict}')
-        logging.info(f'del_dict: {str(delete_dict)}')
         # 0 - _id
         # 1 - title
         # 2 - last
@@ -79,9 +75,6 @@ async def categories_keyboard(current_level, sql, user_id,
         markup.insert(InlineKeyboardButton(
             text=category[1],
             callback_data=callback_data))
-    logging.info('Final look:')
-    delete_dict = f'delete_dict {str(delete_dict)}'
-    logging.info(delete_dict)
     # Создаем Кнопку "Назад"
     if current_level != 0:
         try:
@@ -107,13 +100,12 @@ async def categories_keyboard(current_level, sql, user_id,
                     level=next_level,
                 ),
             ),
+            # TODO: передавать current_level, вызывать get_stage_id
             InlineKeyboardButton(
                 text="Удалить кнопку",
-                # callback_data=delete_button_data(
-                #     button_id=category[0],
-                #     button_name=category[1],
-                callback_data=str(delete_dict)
-                # callback_data='test',
+                callback_data=delete_button_data(
+                    current_level=category[3],
+                ),
             ),
         )
 
