@@ -14,7 +14,7 @@ from keyboards.inline.menu_keybord import cbd_delete
 
 from loader import dp
 
-from utils.db.db_menu import get_stage1, delete_button, draw_tree, show_delete
+from utils.db.db_menu import delete_button, draw_tree, get_stage1, show_delete
 
 
 class FSMDelete(StatesGroup):
@@ -25,11 +25,18 @@ class FSMDelete(StatesGroup):
 @dp.callback_query_handler(cbd_delete.filter())
 async def del_button_start(callback: types.CallbackQuery,
                            callback_data: dict):
+    '''
+    Точка входа в удаление кнопки. Принимает id текущего уровня.
+
+    Внутри себя создает запрос и генерирует новую клавиатуру
+    полученного уровня, где callbackdata = _id кнопки.
+    '''
     await callback.answer()
     sql = ('SELECT _id, title FROM main_pages WHERE level = '
            f'{callback_data["current_level"]}')
     buttons = get_stage1(sql)
     logging.info(f"Current delete buttons: {buttons}")
+    # Сгенерировать новую клавиатуру
     del_markup = IKMarkup(row_width=2)
     for button in buttons:
         # 0 - _id
@@ -40,7 +47,7 @@ async def del_button_start(callback: types.CallbackQuery,
                 text=button[1],
             ),
         )
-    # Вставляем кнопку отмены
+    # Вставить кнопку отмены
     del_markup.row(
         IKButton(
             text='Отмена',
@@ -53,7 +60,7 @@ async def del_button_start(callback: types.CallbackQuery,
                                   reply_markup=del_markup)
 
 
-# Хендлер нажатия на кнопку удаления
+# Хендлер выбора кнопки для удаления
 @dp.callback_query_handler(Text(startswith='delete_'),
                            state=FSMDelete.pick_button)
 async def pick_deletion(callback: types.CallbackQuery, state: FSMContext):
@@ -67,6 +74,7 @@ async def pick_deletion(callback: types.CallbackQuery, state: FSMContext):
                                   reply_markup=cancel_kb)
 
 
+# Хендлер подтверждения удаления
 @dp.message_handler(state=FSMDelete.confirm_delete)
 async def confirmation(message: types.Message, state: FSMContext):
     if message.text.lower() == "подтверждаю":
