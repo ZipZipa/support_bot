@@ -7,17 +7,22 @@ cur = base.cursor()
 
 
 class Tree:
-    def __init__(self, name, prev, db_id):
+    def __init__(self, name, level, next, db_id):
         self.name = name
         self.child = []
-        self.prev = prev
+        self.level = level
+        self.next = next
         self.db_id = db_id
 
-    def add_node(self, child, parent_name, prev, db_id):
-        if ((self.name == parent_name) and (self.prev != prev)):
+    def add_node(self, child, parent_name, level, next, db_id):
+        # if ((self.name == parent_name) and (self.db_id != db_id)):
+        #     self.child.append(child)
+        if ((self.level == -1) and (self.name == parent_name)):
+            self.child.append(child)
+        if ((self.next == child.level)):
             self.child.append(child)
         for i in self.child:
-            i.add_node(child, parent_name, prev, db_id)
+            i.add_node(child, parent_name, level, next, db_id)
 
     def find_db_ids(self, db_id):
         if self.db_id == db_id:
@@ -90,14 +95,14 @@ def create_tree():
            'FROM main_pages ORDER BY level')
     cur.execute(sql)
     draw_tree = cur.fetchall()
-    root = Tree("Root", -1, -1)
+    root = Tree("Root", -1, -1, -1)
     for i in draw_tree:
         for j in draw_tree:
             if i[1] == 0:
-                root.add_node(Tree(i[0], i[1], i[3]), "Root", j[1], i[3])
+                root.add_node(Tree(i[0], i[1], i[2], i[3]), "Root", i[1], i[2], i[3])
                 break
             if i[1] == j[2]:
-                root.add_node(Tree(i[0], i[1], i[3]), j[0], i[1], i[3])
+                root.add_node(Tree(i[0], i[1], i[2], i[3]), j[0], i[1], i[2], i[3])
     return root
     # Рабочая конфигурация получения всех ойдишников цепочки
     # которую надо удалить
