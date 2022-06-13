@@ -79,10 +79,13 @@ async def pick_deletion(callback: types.CallbackQuery, state: FSMContext):
 async def confirmation(message: types.Message, state: FSMContext):
     if message.text.lower() == "подтверждаю":
         async with state.proxy() as data:
+            sql = ('SELECT title FROM main_pages '
+                   f'WHERE _id = {data["remove_id"]}')
+            del_name = ''.join(get_stage1(sql)[0])
             delete_button(data['remove_id'])
-            logging.info(f'{message.from_user.id} удалил main_pages '
+            logging.info(f'{message.from_user.id} удалил кнопку "{del_name}" '
                          f'_id={data["remove_id"]} и её взаимосвязи')
-        await message.answer('Кнопка удалена!')
+            await message.answer(f'Кнопка "{del_name}" удалена!')
         await state.finish()
         await show_menu(message)
     else:

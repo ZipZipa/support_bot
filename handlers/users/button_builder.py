@@ -124,10 +124,10 @@ async def button_text_set(message: types.Message, state: FSMContext):
         # Вызывает функцию добавления кнопки, передает составленный словарь
         add_button(data['pre_level'], data['level'], data['btn_type'],
                    data['rez_id'], data['btn_header'], data['btn_text'])
-        await message.reply('Кнопка успешно добавлена')
+        logging.info(f'{message.from_user.id} добавил кнопку '
+                     f'"{data["btn_header"]}": {data.as_dict()}')
+        await message.reply(f'Кнопка "{data["btn_header"]}" успешно добавлена')
     await state.finish()  # успешное завершение состояния
-    logging.info(f'{message.from_user.id} added button '
-                 f'"{data["btn_header"]}"')
     # Вывод меню на экран
     await show_menu(message,
                     test_pre_level=data['pre_level'],
