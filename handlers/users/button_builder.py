@@ -154,7 +154,7 @@ def text_filter(text, header=False):
                 if sym == ":":
                     text = text.replace(sym, ' ')
     # обработка ссылок в тексте
-    links = re.findall(r'http\S+', text)
+    links = set(re.findall(r'http\S+', text))
     if links:
         for link in links:
             text = text.replace(link, f'<a href="{link}">*link*</a>')
