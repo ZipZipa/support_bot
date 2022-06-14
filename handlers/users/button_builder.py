@@ -28,7 +28,6 @@ class FSMBtn(StatesGroup):
 btn_type_kb = IKMarkup(row_width=2).add(
     IKButton(text='Подкатегория', callback_data='cb_type_0'),
     IKButton(text='Ветвление с заголовком', callback_data='cb_type_2'),
-    IKButton(text='Финальная кнопка', callback_data='cb_type_1'),
     IKButton(text='Отмена', callback_data='cancel'),
     )
 

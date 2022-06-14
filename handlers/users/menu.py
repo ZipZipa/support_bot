@@ -72,22 +72,18 @@ async def navigate(call: CallbackQuery, callback_data: dict):
     user_id = str(call.from_user.id)
     logging.info('Function navigate. Обработка нажатия кнопки')
 
-    if callback_data["button_rezult"] == "1":
-        logging.info('button_rezult= "1": Вывод финального текста')
-        # вставить id резулльтата
-        sql = ('SELECT text FROM rez_pages WHERE index_r = '
-               f'{callback_data["next_level"] };')
-        date = get_stage1(sql)
-        await call.message.edit_text(f"{date[0][0]}")
-        # Формирование кнопки назад
-        await call.message.edit_reply_markup(
-            InlineKeyboardMarkup(row_width=2).row(
-                    InlineKeyboardButton(
-                        text="Назад",
-                        callback_data=make_callback_data(
-                            callback_data["test_pre_level"]))))
-
-    elif callback_data["button_rezult"] == "2":
+    if  callback_data["button_rezult"] == "0":
+        logging.info('button_rezult= "0": Продолжение ветвления')
+        sql = (f'SELECT * FROM main_pages WHERE level = '
+               f'{callback_data["next_level"]};')
+        await list_categories(
+            call, int(callback_data["next_level"]), sql,
+            callback_data["button_rezult"], user_id,
+            callback_data["test_pre_level"],
+            callback_data["next_level"])
+            
+    #Может принять как тип 2 так и остаточный тип 1
+    else:
         logging.info('button_rezult= "2": Вывод промежуточного текста')
         sql = ('SELECT text FROM rez_pages WHERE index_r = '
                f'{callback_data["next_level"]};')
@@ -101,13 +97,4 @@ async def navigate(call: CallbackQuery, callback_data: dict):
             callback_data["next_level"], user_id,
             callback_data["test_pre_level"],
             callback_data["next_level"])
-
-    else:
-        logging.info('button_rezult= "0": Продолжение ветвления')
-        sql = (f'SELECT * FROM main_pages WHERE level = '
-               f'{callback_data["next_level"]};')
-        await list_categories(
-            call, int(callback_data["next_level"]), sql,
-            callback_data["button_rezult"], user_id,
-            callback_data["test_pre_level"],
-            callback_data["next_level"])
+ 
