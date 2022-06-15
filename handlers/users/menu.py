@@ -51,7 +51,7 @@ async def list_categories(message: Union[CallbackQuery, Message],
     # Если Message - отправляем новое сообщение
     if isinstance(message, Message):
         logging.info('Если Message - отправляем новое сообщение')
-        await message.answer("Главное меню", reply_markup=markup)
+        await message.answer("Что вас интерсует?", reply_markup=markup)
 
     # Если CallbackQuery - изменяем это сообщение
     elif isinstance(message, CallbackQuery):
