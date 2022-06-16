@@ -14,7 +14,7 @@ from utils.db.db_menu import Tree, get_stage1
 from typing import Union
 
 def check_admin(user_id):
-    sql = f'SELECT {user_id} FROM users WHERE is_admin = "true"'
+    sql = f'SELECT {user_id} FROM users WHERE is_admin = true'
     list_admins = get_stage1(sql)
     for admin in list_admins:
         return admin in list_admins
