@@ -67,7 +67,9 @@ def get_stage1(sql):
 
     types = cur.fetchall()
     logging.info(f'Data SQL. Pass the parametr categories {types}')
+    base.commit()
     return (types)
+    
 
 
 def add_user(usr, usr_full_name):
