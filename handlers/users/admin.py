@@ -94,11 +94,13 @@ async def remove_admin(call: CallbackQuery, state: FSMContext):
 async def food_chosen(message: Message, state: FSMContext):
     sql = f'UPDATE users SET is_admin = true WHERE user_id = {str(message.text)}'
     get_stage1(sql)
+    await dp.bot.send_message(str(message.text), '''Вас добавили в админы''')
     await state.finish()
 
 @dp.message_handler(state=change_admin.waiting_remove_id) 
 async def food_chosen(message: Message, state: FSMContext):
     sql = f'UPDATE users SET is_admin = false WHERE user_id = {str(message.text)}'
     get_stage1(sql)
+    await dp.bot.send_message(str(message.text), '''Вас удалили из админов''')
     await state.finish()
 
