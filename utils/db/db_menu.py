@@ -139,10 +139,36 @@ def add_button(pre_level, level, btn_type, rez_id, btn_header, btn_text):
 
 
 def delete_button(btn_id):
+    '''
+    Функция удаляет данные из main_pages, rez_pages.
+
+    Принимает на вход _id кнопки из main_pages.
+    Из этого _id собирает main_pages_ids - _id кнопок
+    в этой же ветке.
+
+    С помощью SELECT из списка main_pages_ids собирает rez_page_id,
+    далее удаляет оператором DELETE из таблицы rez_pages
+    по индексу index_r (main_pages.rez_page_id == rez_pages.index_r).
+    '''
     try:
-        cur.execute('DELETE FROM main_pages WHERE _id IN '
-                    f'({create_tree().find_db_ids(btn_id).get_db_ids()[:-2]})')
+        # инициализация данных
+        main_pages_ids = create_tree().find_db_ids(btn_id).get_db_ids()[:-2]
+        get_rez_sql = ('SELECT rez_page_id FROM main_pages WHERE _id IN '
+                       f'({main_pages_ids})')
+        sql_res = get_stage1(get_rez_sql)
+        rp_ids = " ,".join([str(db_id).strip(',()') for db_id in sql_res])
+        # удаление из main_pages
+        delete_main = ('DELETE FROM main_pages WHERE _id IN '
+                       f'({main_pages_ids})')
+        cur.execute(delete_main)
         base.commit()
+        # удаление из rez_pages
+        if rp_ids:
+            delete_rez = ('DELETE FROM rez_pages WHERE index_r IN '
+                          f'({rp_ids})')
+            cur.execute(delete_rez)
+            base.commit()
+
     except sq.Error as error:
         logging.info("Ошибка", error)
 
