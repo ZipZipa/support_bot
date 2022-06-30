@@ -14,6 +14,7 @@ from utils.db.db_menu import all_users, create_tree, draw_tree
 from utils.db.db_menu import Tree, get_stage1
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.utils.exceptions import BadRequest
 
 def check_admin(user_id):
     sql = 'SELECT user_id FROM users WHERE is_admin = true'
@@ -55,8 +56,27 @@ async def admin_buttons(message: Message):
 
 @dp.callback_query_handler(text="user_list")
 async def show_users(call: CallbackQuery):
-    await call.message.edit_text('\n'.join(str(value) for value in all_users()))
-    await call.answer()
+    users = '\n'.join(str(value) for value in all_users())
+    try:
+        await call.message.edit_text(users)
+    except BadRequest:
+        users = users.split('\n')
+        position = 0
+        temp = []
+        total_len = 0
+        while users:
+            temp.append(users[position])
+            total_len += len(users[position])
+            position += 1
+            if total_len >= 4500:
+                result = '\n'.join(temp)
+                await call.message.answer(result)
+                temp = []
+                del users[0:position]
+                position = 0
+                total_len = 0
+    finally:
+        await call.answer()
 
 @dp.callback_query_handler(text="project_tree")
 async def project_tree(call: CallbackQuery):
