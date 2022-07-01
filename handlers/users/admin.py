@@ -25,7 +25,7 @@ def check_admin(user_id):
             break
         else:
             a=False
-    return True
+    return a
 
 def get_keyboard():
     # Генерация клавиатуры.
