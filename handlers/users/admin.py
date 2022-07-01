@@ -17,22 +17,14 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.exceptions import BadRequest
 
 def check_admin(user_id):
-    # sql = 'SELECT user_id FROM users WHERE is_admin = true'
-    # list_admins = get_stage1(sql)
-    # for admin in list_admins:
-    #     if user_id == str(admin[0]):
-    #         a=True
-    #         break
-    #     else:
-    #         a=False
-
-    # import sqlite3 as sq
-    # base = sq.connect('sqlite_python.db')
-    # cur = base.cursor()
-    # for i in range(1000, 2000):
-    #     sql = f'INSERT INTO users (user_id, subsribe, usr_full_name, is_admin) VALUES ({int(100+i)}, false, "Username{i}", NULL)'
-    #     cur.execute(sql)
-    #     base.commit()
+    sql = 'SELECT user_id FROM users WHERE is_admin = true'
+    list_admins = get_stage1(sql)
+    for admin in list_admins:
+        if user_id == str(admin[0]):
+            a=True
+            break
+        else:
+            a=False
     return True
 
 def get_keyboard():
